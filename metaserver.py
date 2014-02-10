@@ -211,7 +211,11 @@ def user_list():
     """
     users = { }
     for collection in ('annotations', 'medias', 'packages', 'annotationtypes'):
-        aggr = db[collection].aggregate( [ { '$group': { '_id': '$meta.dc:contributor', 'count': { '$sum': 1 } } } ] )
+        if collection in ('annotations', 'medias'):
+            field = '$meta.dc:contributor'
+        else:
+            field = '$dc:contributor'
+        aggr = db[collection].aggregate( [ { '$group': { '_id': field, 'count': { '$sum': 1 } } } ] )
         for res in aggr['result']:
             users.setdefault(res['_id'], {})[collection] = res['count']
     return current_app.response_class( json.dumps(users,

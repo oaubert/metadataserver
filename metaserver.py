@@ -74,7 +74,7 @@ def clean_json(data, mapping=None):
     if 'http://advene.liris.cnrs.fr/ns/frame_of_reference/ms' in data:
         del data['http://advene.liris.cnrs.fr/ns/frame_of_reference/ms']
     # For any element
-    # Author Metadata is in the meta dict, or in the dict itself
+    # Author Metadata is in the meta dict (annotation, media), or in the dict itself (annotationtype, package)
     meta = data.get('meta', data)
     for n in ('dc:created.contents', 'dc:creator.contents'):
         if n in meta:

@@ -246,9 +246,15 @@ def package_list():
             db['annotations'].save(clean_json(a, mapping))
 
         p = data['meta']
+
+        # Interim hack for malformed data
+        if p['main_media']['id-ref'] == 'package1':
+            p['main_media']['id-ref'] = data['medias'][0]['id']
+
         newmediaref = mapping.get(p['main_media'].get('id-ref'))
         if newmediaref is not None:
             p['main_media']['id-ref'] = newmediaref
+                
         fix_ids(p)
         # FIXME: there should be some way to specify associated media/annotationtypes/annotations.
         # Maybe store in meta some info containings ids?

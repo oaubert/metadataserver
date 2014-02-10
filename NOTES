@@ -1,0 +1,38 @@
+* Server
+Mongo Collections:
+- user (key: login) ["system" user for system annotations ? or a generic metadata/tag?]
+- annotation (key: id)
+- annotationtype (key: id)
+- media (key: id)
+- package (key: id/UUID)
+- userinfo (login information)
+- trace (some activity trace)
+
+Every list operation (annotation, annotation list, etc) can take a
+?filter=name:value parameter, that will add a query filter. Possible "name" values are:
+user, media, package, type
+
+*/annotation/ -> list of annotations (may be huge?)
+*/annotation/{{id}} -> annotation (cinelab format)
+
+/annotationtype/ -> list of annotation types
+/annotationtype/{{id}} -> annotation type (cinelab format)
+
+*/user/ -> list of users
+*/user/{{id}} -> user data/profile (json: {email: ..., fullname: ..., etc))
+*/user/{{id}}/annotation -> annotations created by user id. POST to it to create annotation?
+/user/{{id}}/annotationtype -> annotation types created by user id. POST to it to create annotationtype?
+/user/{{id}}/package -> packages created by user id
+/user/{{id}}/media -> list of medias annotated by user
+
+*/media/ -> list of media
+*/media/{{id}} -> media information (json: { url: "", title: "", creator: "", duration: "", ..., "mds:annotation-count": 12 })
+/media/{{id}}/annotation -> all annotations linked to media [list]
+/media/{{id}}/annotation/user -> all user annotations linked to media [list]
+/media/{{id}}/annotation/user/{{id}} -> annotations by user "id" linked to media [list] 
+/media/{{id}}/annotation/system -> all system annotations linked to media [list]
+/media/{{id}}/packages -> packages referring to /media (list of urls redirecting to packages)
+
+/package/ -> list of packages
+/package/{{id}} -> main package information (mainly meta json + mds:annotation = list of URLs that are used to gather annotations)
+

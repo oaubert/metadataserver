@@ -151,111 +151,59 @@ def logout():
     session.pop('userinfo', None)
     return redirect(url_for('index'))
 
-@app.route(API_PREFIX + 'annotation/', methods= [ 'GET', 'POST' ])
-def annotation_list():
+# Specific fields that can be used to filter elements, in addition to the standard ones (user)
+SPECIFIC_QUERYMAPS = {
+    'annotations': {
+        'media': 'media',
+        'type': 'meta.id-ref',
+    },
+    'medias': {
+        'url': 'url',
+    },
+    'annotationtypes': {
+    },
+    'user': {
+    }
+}
+
+
+@app.route(API_PREFIX + 'annotation/', methods= [ 'GET', 'POST' ], defaults={'collection': 'annotations'})
+@app.route(API_PREFIX + 'annotationtype/', methods= [ 'GET', 'POST' ], defaults={'collection': 'annotationtypes'})
+@app.route(API_PREFIX + 'media/', methods= [ 'GET', 'POST' ], defaults={'collection': 'medias'})
+@app.route(API_PREFIX + 'user/', methods= [ 'GET', 'POST' ], defaults={'collection': 'userinfo'})
+def element_list(collection):
     if request.method == 'POST':
-        # Insert a new annotation
+        # FIXME: do some sanity checks here (valid properties, existing ids...)
+        # Insert a new element
         data = clean_json(request.json)
-        # FIXME: what to do with media id, annotationtype id, creator (check for existence, or create by default?)
-        db['annotations'].save(data)
+        db[collection].save(data)
         return jsonify(id=data['id'])
     else:
-        querymap = { 'user': 'meta.dc:creator',
-                     # 'media': 'media',
-                     'type': 'meta.id-ref' }
+        querymap = { 'user': 'meta.dc:contributor',
+                     'creator': 'meta.dc:creator' }
+        querymap.update(SPECIFIC_QUERYMAPS[collection])
         query = dict( (querymap.get(name, name), value)
-                      for f in request.values.getlist('filter')
-                      for name, value in f.split(':') )
-        cursor = db['annotations'].find(query)
+                      for (name, value) in ( f.split(':') for f in request.values.getlist('filter') ) 
+                      if 'name' in querymap
+        )
+        cursor = db[collection].find(query)
         response = current_app.response_class( json.dumps(list(restore_json(a) for a in cursor),
                                                           indent=None if request.is_xhr else 2,
                                                           cls=MongoEncoder),
                                                mimetype='application/json')
         return response
 
-@app.route(API_PREFIX + 'annotation/<string:aid>', methods= [ 'GET' ])
-def annotation_get(aid):
-    a = db['annotations'].find_one({ 'id': aid })
-    if a is None:
+@app.route(API_PREFIX + 'annotation/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'annotations'})
+@app.route(API_PREFIX + 'annotationtype/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'annotationtypes'})
+@app.route(API_PREFIX + 'media/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'medias'})
+@app.route(API_PREFIX + 'user/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'userinfo'})
+def element_get(eid, collection):
+    el = db[collection].find_one({ 'id': eid })
+    if el is None:
         abort(404)
-    return current_app.response_class(json.dumps(a, indent=None if request.is_xhr else 2, cls=MongoEncoder), 
+    return current_app.response_class(json.dumps(el, indent=None if request.is_xhr else 2, cls=MongoEncoder), 
                                       mimetype='application/json')
 
-@app.route(API_PREFIX + 'annotationtype/', methods= [ 'GET', 'POST' ])
-def annotationtype_list():
-    if request.method == 'POST':
-        # Insert a new annotation type
-        data = clean_json(request.json)
-        # FIXME: what to do with media id, annotationtype id, creator (check for existence, or create by default?)
-        db['annotationtypes'].save(data)
-        return jsonify(id=data['id'])
-    else:
-        querymap = { 'user': 'meta.dc:creator' }
-        query = dict( (querymap.get(name, name), value)
-                      for f in request.values.getlist('filter')
-                      for name, value in f.split(':') )
-        cursor = db['annotationtypes'].find(query)
-        response = current_app.response_class( json.dumps(list(restore_json(a) for a in cursor),
-                                                          indent=None if request.is_xhr else 2,
-                                                          cls=MongoEncoder),
-                                               mimetype='application/json')
-        return response
-
-@app.route(API_PREFIX + 'annotationtype/<string:aid>', methods= [ 'GET' ])
-def annotationtype_get(aid):
-    a = db['annotationtypes'].find_one({ 'id': aid })
-    if a is None:
-        abort(404)
-    return current_app.response_class(json.dumps(a, indent=None if request.is_xhr else 2, cls=MongoEncoder), 
-                                      mimetype='application/json')
-
-@app.route(API_PREFIX + 'media/', methods= [ 'GET', 'POST' ])
-def media_list():
-    if request.method == 'POST':
-        # Insert a new media
-        data = clean_json(request.json)
-        db['medias'].save(data)
-        return jsonify(id=data['id'])
-    else:
-        # FIXME: Specific /media filters: url:name, 
-        querymap = { 'user': 'meta.dc:creator',
-                     # 'url': 'url' 
-                   }
-        query = dict( (querymap.get(name, name), value)
-                      for f in request.values.getlist('filter')
-                      for name, value in f.split(':') )
-        cursor = db['medias'].find(query)
-
-        response = current_app.response_class( json.dumps(list(restore_json(m) for m in cursor),
-                                                          indent=None if request.is_xhr else 2,
-                                                          cls=MongoEncoder),
-                                               mimetype='application/json')
-        return response
-
-@app.route(API_PREFIX + 'media/<string:mid>', methods= [ 'GET' ])
-def media_get(mid):
-    m = db['medias'].find_one({ 'id': mid })
-    if m is None:
-        abort(404)
-    return current_app.response_class(json.dumps(m, indent=None if request.is_xhr else 2, cls=MongoEncoder),
-                                      mimetype='application/json')
-
-@app.route(API_PREFIX + 'user/', methods= [ 'GET' ])
-def user_list():
-    cursor = db['userinfo'].find()
-    response = current_app.response_class( json.dumps(list(cursor),
-                                                      indent=None if request.is_xhr else 2,
-                                                      cls=MongoEncoder),
-                                           mimetype='application/json')
-    return response
-
-@app.route(API_PREFIX + 'user/<string:uid>', methods= [ 'GET' ])
-def user_get(uid):
-    u = db['userinfo'].find_one({ 'id': uid })
-    if u is None:
-        abort(404)
-    return current_app.response_class(json.dumps(u, indent=None if request.is_xhr else 2, cls=MongoEncoder),
-                                      mimetype='application/json')
 
 @app.route(API_PREFIX + 'user/<string:uid>/annotation', methods= [ 'GET' ])
 def user_annotation_list(uid):

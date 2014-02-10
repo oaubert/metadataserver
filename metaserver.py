@@ -162,7 +162,7 @@ SPECIFIC_QUERYMAPS = {
     },
     'annotationtypes': {
     },
-    'user': {
+    'userinfo': {
     }
 }
 
@@ -170,7 +170,7 @@ SPECIFIC_QUERYMAPS = {
 @app.route(API_PREFIX + 'annotation/', methods= [ 'GET', 'POST' ], defaults={'collection': 'annotations'})
 @app.route(API_PREFIX + 'annotationtype/', methods= [ 'GET', 'POST' ], defaults={'collection': 'annotationtypes'})
 @app.route(API_PREFIX + 'media/', methods= [ 'GET', 'POST' ], defaults={'collection': 'medias'})
-@app.route(API_PREFIX + 'user/', methods= [ 'GET', 'POST' ], defaults={'collection': 'userinfo'})
+@app.route(API_PREFIX + 'userinfo/', methods= [ 'GET', 'POST' ], defaults={'collection': 'userinfo'})
 def element_list(collection):
     if request.method == 'POST':
         # FIXME: do some sanity checks here (valid properties, existing ids...)
@@ -196,7 +196,7 @@ def element_list(collection):
 @app.route(API_PREFIX + 'annotation/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'annotations'})
 @app.route(API_PREFIX + 'annotationtype/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'annotationtypes'})
 @app.route(API_PREFIX + 'media/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'medias'})
-@app.route(API_PREFIX + 'user/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'userinfo'})
+@app.route(API_PREFIX + 'userinfo/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'userinfo'})
 def element_get(eid, collection):
     el = db[collection].find_one({ 'id': eid })
     if el is None:
@@ -205,9 +205,23 @@ def element_get(eid, collection):
                                       mimetype='application/json')
 
 
+@app.route(API_PREFIX + 'user/', methods= [ 'GET' ])
+def user_list():
+    """Enumerate contributing users.
+    """
+    users = { }
+    for collection in ('annotations', 'medias', 'packages', 'annotationtypes'):
+        aggr = db[collection].aggregate( [ { '$group': { '_id': '$meta.dc:contributor', 'count': { '$sum': 1 } } } ] )
+        for res in aggr['result']:
+            users.setdefault(res['_id'], {})[collection] = res['count']
+    return current_app.response_class( json.dumps(users,
+                                       indent=None if request.is_xhr else 2,
+                                       cls=MongoEncoder), 
+                                       mimetype='application/json')
+
 @app.route(API_PREFIX + 'user/<string:uid>/annotation', methods= [ 'GET' ])
 def user_annotation_list(uid):
-    return current_app.response_class( json.dumps(list(db['annotation'].find({'meta.dc:creator': uid})),
+    return current_app.response_class( json.dumps(list(db['annotations'].find({'meta.dc:creator': uid})),
                                                   indent=None if request.is_xhr else 2,
                                                   cls=MongoEncoder),
                                        mimetype='application/json')

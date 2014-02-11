@@ -252,7 +252,7 @@
         return val;
       },
       control: function(column, val) {
-        var e = $('<input type="text" data-role="control" />');
+        var e = $('<input class="pure-input-2-3" type="text" data-role="control" />');
         e.val(val);
         return e;
       },
@@ -320,7 +320,7 @@
         return val ? 'Yes' : 'No';
       },
       control: function(column, val) {
-        var e = $('<input type="checkbox" data-role="control" value="1" />');
+        var e = $('<input class="pure-input-2-3" type="checkbox" data-role="control" value="1" />');
         e[0].checked = val;
         return e;
       },
@@ -349,7 +349,7 @@
         return val;
       },
       control: function(column, val) {
-        var e = $('<input type="text" readonly data-role="control"></span>');
+        var e = $('<input class="pure-input-2-3" type="text" readonly data-role="control"></span>');
         e.val(val);
         return e;
       },
@@ -547,7 +547,7 @@
     {
       var isNew = (datum === false);
       var outer = $('<div class="editor"></div>');
-      var form = $('<form></form>');
+      var form = $('<form class="pure-form pure-form-aligned"></form>');
       if (isNew)
       {
         datum = {};
@@ -580,8 +580,9 @@
         else {
           fieldset.append(control);
         }
-
-        form.append(fieldset);
+        var group = $('<div class="pure-control-group"></div>');
+        group.append(fieldset);
+        form.append(group);
       });
       outer.append(form);
       var controlGroup = $('<div class="form-actions"></div>');

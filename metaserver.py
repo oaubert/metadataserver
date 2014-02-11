@@ -137,6 +137,13 @@ def index():
                            )
     return 'You are not logged in'
 
+@app.route("/package/")
+def packages_view():
+    packages = list(db['packages'].find())
+    for p in packages:
+        p['media'] = db['medias'].find_one({ 'id': p['main_media']['id-ref'] })
+    return render_template('packages.html', packages=packages)
+
 @app.route("/package/<string:pid>/")
 def package_view(pid):
     package = db['packages'].find_one({ 'id': pid })

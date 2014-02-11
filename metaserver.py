@@ -57,7 +57,9 @@ class MongoEncoder(json.JSONEncoder):
 def fix_ids(data, mapping=None):
     if mapping is None:
         mapping = {}
-    if len(data['id']) < 36:
+    if not 'id' in data:
+        data['id'] = str(uuid.uuid1())
+    elif len(data['id']) < 36:
         # It is not a UUID, generate one
         old = data['mds:oldid'] = data['id']
         mapping[old] = data['id'] = str(uuid.uuid1())

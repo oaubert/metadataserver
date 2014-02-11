@@ -17,39 +17,64 @@
     $(function() {
         $('#media-listing').restAdmin({
             url: '/api/media/',
-            schema: [ 
-                { 
-                    name: "id", 
-                    type: "text", 
+            schema: [
+                {
+                    name: "id",
+                    type: "text",
                     label: "id",
                     unique: true,
                     required: true
                 },
-                { 
-                    name: "url", 
-                    type: "text", 
+                {
+                    name: "url",
+                    type: "text",
                     label: "url",
                     unique: false,
                     required: true
                 },
-                { 
+                {
                     name: "meta.dc:title",
                     type: "text",
-                    label: "Title",
+                    label: "Title"
                 },
-                { 
+                {
                     name: "meta.dc:duration",
                     type: "text",
-                    label: "duration",
+                    label: "duration"
                 },
-                { 
+                {
+                    name: "unit",
+                    type: "text",
+                    defaultValue: "ms"
+                },
+                {
                     name: "meta.dc:description",
                     type: "text",
-                    label: "description",
+                    label: "description"
+                },
+                {
+                    name: "meta.dc:creator",
+                    type: "text",
+                    label: "creator"
+                },
+                {
+                    name: "meta.dc:created",
+                    type: "text",
+                    label: "created"
+                },
+                {
+                    name: "meta.dc:contributor",
+                    type: "text",
+                    label: "contributor"
+                },
+                {
+                    name: "meta.dc:modified",
+                    type: "text",
+                    label: "modified"
                 }
-            ] 
+            ]
         });
-    });  
+    });
 </script>
 
 </body>

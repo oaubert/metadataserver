@@ -1,6 +1,7 @@
 <!doctype html>
 <head>
   <title>Metadata Server Admin</title>
+  <link href='/static/jquery.dataTables.css' rel='stylesheet' type='text/css'>
 </head>
 <body>
 <header>
@@ -13,6 +14,7 @@
 <script type="text/javascript" src="/static/underscore.js"></script>
 <script type="text/javascript" src="/static/jquery.min.js"></script>
 <script type="text/javascript" src="/static/jquery.restAdmin.js"></script>
+<script type="text/javascript" src="/static/jquery.dataTables.min.js"></script>
 <script type="text/javascript">
     $(function() {
         $('#media-listing').restAdmin({
@@ -75,6 +77,18 @@
             ]
         });
     });
+
+  $(document).on('jraRefreshedList', function () {
+      $("table").dataTable({
+          "bPaginate": false,
+          "bLengthChange": false,
+          "iDisplayLength": 100,
+          "bFilter": true,
+          "bSort": true,
+          "bInfo": true,
+          "bAutoWidth": true });
+  });
+
 </script>
 
 </body>

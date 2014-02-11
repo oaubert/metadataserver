@@ -70,6 +70,8 @@ def clean_json(data, mapping=None):
 
     Mongo does not accept dots in attribute names.
     """
+    if mapping is None:
+        mapping = {}
     # Fix ids for all elements
     fix_ids(data, mapping)
     # For media

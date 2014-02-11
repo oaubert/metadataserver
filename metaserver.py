@@ -142,7 +142,8 @@ def package_view(pid):
     package = db['packages'].find_one({ 'id': pid })
     if package is None:
         abort(404)
-    return render_template('package.html', package=package)
+    media = db['medias'].find_one({ 'id': package['main_media']['id-ref'] })
+    return render_template('package.html', package=package, media=media)
 
 @app.route("/package/<string:pid>/imagecache/<path:info>")
 def imagecache_view(pid, info):

@@ -1,0 +1,22 @@
+<!doctype html>
+<head>
+  <title>Metadata Server</title>
+</head>
+<body>
+<header>
+  {% if userinfo %}
+  <p>Hello {{ userinfo.login }}!</p>
+  {% endif %}
+</header>
+<h1>Package listing</h1>
+<ul>
+{% for p in packages %}
+<li><a href="/package/{{ p.id }}">{{ p.dc_title }}</a> - {{ p.annotations|length }}
+  annotation(s) - media <a href="{{ p.main_media.url }}">{{ p.main_media.meta.dc_title }}</a>
+</li>
+{% else %}
+<li>No package</li>
+{% endfor %}
+</ul>
+</body>
+

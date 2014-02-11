@@ -23,7 +23,7 @@ import bson
 import uuid
 import time
 from optparse import OptionParser
-from flask import Flask, Response
+from flask import Flask, Response, render_template
 from flask import session, request, redirect, url_for, current_app, abort, jsonify
 import pymongo
 
@@ -105,6 +105,14 @@ def restore_json(data):
             del meta[n]
     return data
 
+def uncolon(data):
+    for n,v in list(data.iteritems()):
+        if ':' in n:
+            data[n.replace(':', '_')] = v
+        if isinstance(v, dict):
+            uncolon(v)
+    return data
+
 @app.errorhandler(401)
 def custom_401(error):
     return Response('Unauthorized access', 401, {'WWWAuthenticate':'Basic realm="Login Required"'})
@@ -114,7 +122,19 @@ def index():
     if 'userinfo' in session:
         #return 'Logged in as : %s' % escape(session['navigator'])
         #session['navigator']['id']="test";
-        return "Logged in as " + session['userinfo']['id']
+        packages = list(db['packages'].find())
+        for p in packages:
+            uncolon(p)
+            media = db['medias'].find_one({'id': p['main_media']['id-ref']})
+            if media:
+                p['main_media'].update(uncolon(media))
+            p['annotations'] = list(db['annotations'].find({'media': p['main_media']['id-ref']}))
+            for a in p['annotations']:
+                uncolon(a)
+        return render_template('index.html',
+                               userinfo=session['userinfo'],
+                               packages=packages
+                           )
     return 'You are not logged in'
 
 @app.route('/login', methods = ['GET', 'POST'])

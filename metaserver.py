@@ -187,7 +187,7 @@ def element_list(collection):
                      'creator': 'meta.dc:creator' }
         querymap.update(SPECIFIC_QUERYMAPS[collection])
         query = dict( (querymap.get(name, name), value)
-                      for (name, value) in ( f.split(':') for f in request.values.getlist('filter') ) 
+                      for (name, value) in ( f.split(':') for f in request.values.getlist('filter') )
                       if 'name' in querymap
         )
         cursor = db[collection].find(query)
@@ -205,7 +205,7 @@ def element_get(eid, collection):
     el = db[collection].find_one({ 'id': eid })
     if el is None:
         abort(404)
-    return current_app.response_class(json.dumps(el, indent=None if request.is_xhr else 2, cls=MongoEncoder), 
+    return current_app.response_class(json.dumps(el, indent=None if request.is_xhr else 2, cls=MongoEncoder),
                                       mimetype='application/json')
 
 
@@ -224,7 +224,7 @@ def user_list():
             users.setdefault(res['_id'], {})[collection] = res['count']
     return current_app.response_class( json.dumps(users,
                                        indent=None if request.is_xhr else 2,
-                                       cls=MongoEncoder), 
+                                       cls=MongoEncoder),
                                        mimetype='application/json')
 
 @app.route(API_PREFIX + 'user/<string:uid>/annotation', methods= [ 'GET' ])
@@ -258,7 +258,7 @@ def package_list():
         newmediaref = mapping.get(p['main_media'].get('id-ref'))
         if newmediaref is not None:
             p['main_media']['id-ref'] = newmediaref
-                
+
         fix_ids(p)
         # FIXME: there should be some way to specify associated media/annotationtypes/annotations.
         # Maybe store in meta some info containings ids?
@@ -267,7 +267,7 @@ def package_list():
     else:
         querymap = { 'user': 'meta.dc:contributor',
                      'creator': 'meta.dc:creator',
-                     # 'url': 'url' 
+                     # 'url': 'url'
                    }
         query = dict( (querymap.get(name, name), value)
                       for f in request.values.getlist('filter')

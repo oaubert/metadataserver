@@ -1,0 +1,55 @@
+<!doctype html>
+<head>
+  <title>Metadata Server Admin</title>
+</head>
+<body>
+<header>
+</header>
+<h1>Package listing</h1>
+<div id="package-listing"></div>
+<h1>Media listing</h1>
+<div id="media-listing"></div>
+
+<script type="text/javascript" src="/static/underscore.js"></script>
+<script type="text/javascript" src="/static/jquery.min.js"></script>
+<script type="text/javascript" src="/static/jquery.restAdmin.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $('#media-listing').restAdmin({
+            url: '/api/media/',
+            schema: [ 
+                { 
+                    name: "id", 
+                    type: "text", 
+                    label: "id",
+                    unique: true,
+                    required: true
+                },
+                { 
+                    name: "url", 
+                    type: "text", 
+                    label: "url",
+                    unique: false,
+                    required: true
+                },
+                { 
+                    name: "meta.dc:title",
+                    type: "text",
+                    label: "Title",
+                },
+                { 
+                    name: "meta.dc:duration",
+                    type: "text",
+                    label: "duration",
+                },
+                { 
+                    name: "meta.dc:description",
+                    type: "text",
+                    label: "description",
+                }
+            ] 
+        });
+    });  
+</script>
+
+</body>

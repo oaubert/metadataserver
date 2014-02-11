@@ -64,7 +64,7 @@ def fix_ids(data, mapping=None):
         old = data['mds:oldid'] = data['id']
         mapping[old] = data['id'] = str(uuid.uuid1())
     return data
-    
+
 def clean_json(data, mapping=None):
     """Clean the input json.
 
@@ -136,6 +136,10 @@ def index():
                                packages=packages
                            )
     return 'You are not logged in'
+
+@app.route("/admin/")
+def admin_view():
+    return render_template('admin.html')
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():

@@ -168,8 +168,10 @@
       {
         $.ajax(options.url, {
           type: 'POST',
-          data: datum,
+          data: JSON.stringify(datum),
           dataType: 'json',
+          processData: false,
+          contentType: "application/json",
           success: params.success,
           error: params.error
         });
@@ -183,8 +185,10 @@
       {
         $.ajax(options.url + '/' + datum[idColumn], {
           type: 'PUT',
-          data: datum,
+          data: JSON.stringify(datum),
           dataType: 'json',
+          processData: false,
+          contentType: "application/json",
           success: params.success,
           error: params.error
         });
@@ -228,6 +232,7 @@
         $.ajax(options.url + '/rank', {
           type: 'PUT',
           dataType: 'json',
+          contentType: "application/json",
           data: { order: order },
           success: params.success,
           error: params.error

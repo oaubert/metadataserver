@@ -207,10 +207,11 @@ SPECIFIC_QUERYMAPS = {
 }
 
 
-@app.route(API_PREFIX + 'annotation/', methods= [ 'GET', 'POST' ], defaults={'collection': 'annotations'})
-@app.route(API_PREFIX + 'annotationtype/', methods= [ 'GET', 'POST' ], defaults={'collection': 'annotationtypes'})
-@app.route(API_PREFIX + 'media/', methods= [ 'GET', 'POST' ], defaults={'collection': 'medias'})
-@app.route(API_PREFIX + 'userinfo/', methods= [ 'GET', 'POST' ], defaults={'collection': 'userinfo'})
+@app.route(API_PREFIX + 'annotation', methods= [ 'GET', 'POST' ], defaults={'collection': 'annotations'})
+@app.route(API_PREFIX + 'annotationtype', methods= [ 'GET', 'POST' ], defaults={'collection': 'annotationtypes'})
+@app.route(API_PREFIX + 'media', methods= [ 'GET', 'POST' ], defaults={'collection': 'medias'})
+@app.route(API_PREFIX + 'userinfo', methods= [ 'GET', 'POST' ], defaults={'collection': 'userinfo'})
+@app.route(API_PREFIX + 'meta', methods= [ 'GET', 'POST' ], defaults={'collection': 'packages'})
 def element_list(collection):
     if request.method == 'POST':
         # FIXME: do some sanity checks here (valid properties, existing ids...)

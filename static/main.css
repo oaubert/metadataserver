@@ -1,0 +1,154 @@
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+img a {
+    border: none;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    background-color: #F7F6F6;
+    color: #003050;
+    height: 95%;
+}
+
+body, p, h1, h2, h3 {
+    font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+}
+
+h1  {
+    margin: 5px 0; text-align: center; font-size: 24px;
+}
+
+ul.pageindex {
+    font-size: 20px; padding-left: 25px; list-style: disc;
+}
+
+h2 {
+    font-size: 20px; margin: 5px 0;
+}
+
+#SlideContainer {
+    width: 70%;
+    float: left;
+    display: inline;
+    min-width: 800;
+    min-height: 600;
+}
+
+#LdtPlayer {
+    position: fixed;
+    top: 6em;
+    right: 1em;
+    margin: 10px;
+    background-color: #fff;
+}
+
+@media all and (max-width: 1200px) {
+    #LdtPlayer {
+        zoom: .3;
+    }
+    
+    #LdtPlayer:hover {
+        zoom: 1;
+    }
+}
+
+#toc {
+    width: 100%;
+    margin: 10px 0;
+    text-align: center;
+    overflow-y: hidden;
+    max-height: 90%;
+}
+
+#AnnotationsListContainer, #SlideShareContainer {
+    overflow-y: hidden;
+}
+
+.Ldt-AnnotationsListWidget {
+    max-height: 100% !important;
+    overflow-y: hidden !important;
+}
+
+h3.Ldt-AnnotationsList-Title {
+    display: none;
+}
+
+.Ldt-Annotation-Social {
+    display: none;
+}
+
+p.Ldt-AnnotationsList-Description, .Ldt-AnnotationsList-Duration, .Ldt-AnnotationsList-Title {
+    display: none;
+}
+
+li.Ldt-AnnotationsList-li {
+    display: inline;
+}
+
+.Ldt-AnnotationsList-Thumbnail:hover {
+    border: 1px solid grey;
+}
+
+footer {
+    position: fixed;
+    bottom: 2px;
+    right: 2px;
+    background-color: #F7F6F6;
+    opacity: .8;
+    font-size: 12px;
+}
+footer img {
+    height: 20px;
+}
+
+.hint {
+    display: none;
+}
+
+@media all and (max-height: 800px) {
+    #licensetext {
+        display: none;
+    }
+    .hint {
+        display: inline;
+    }
+    #toc {
+        position: fixed;
+        bottom: 5px;
+        right: 0px;
+        max-height: 80px;
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+
+    #toc #AnnotationsListContainer {
+        display: none;
+    }
+    #toc:hover #AnnotationsListContainer {
+        display: block;
+    }
+}

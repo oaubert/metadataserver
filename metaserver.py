@@ -137,6 +137,17 @@ def index():
                            )
     return 'You are not logged in'
 
+@app.route("/package/<string:pid>/")
+def package_view(pid):
+    package = db['packages'].find_one({ 'id': pid })
+    if package is None:
+        abort(404)
+    return render_template('package.html', package=package)
+
+@app.route("/package/<string:pid>/imagecache/<path:info>")
+def imagecache_view(pid, info):
+    return redirect('/static/imagecache/%s/%s' % (pid, info), code=301)
+
 @app.route("/admin/")
 def admin_view():
     return render_template('admin.html')

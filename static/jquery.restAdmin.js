@@ -19,6 +19,48 @@
 
 (function( $ ){
 
+    function traverse(obj, desc, value) {
+        /* Code by Jason More: http://stackoverflow.com/questions/8051975/access-object-child-properties-using-a-dot-notation-string */
+        var arr = desc.split(".");
+        
+        while (arr.length && obj) {
+            var comp = arr.shift();
+            var match = new RegExp("(.+)\\[([0-9]*)\\]").exec(comp);
+
+            // handle arrays
+            if ((match !== null) && (match.length == 3)) {
+                var arrayData = {
+                    arrName: match[1],
+                    arrIndex: match[2]
+                };
+                if (obj[arrayData.arrName] !== undefined) {
+                    if (value && arr.length === 0) {
+                        obj[arrayData.arrName][arrayData.arrIndex] = value;
+                    }
+                    obj = obj[arrayData.arrName][arrayData.arrIndex];
+                } else {
+                    obj = undefined;
+                }
+                continue;
+            }
+
+            // handle regular things
+            if (value) {
+                if (obj[comp] === undefined) {
+                    obj[comp] = {};
+                }
+
+                if (arr.length === 0) {
+                    obj[comp] = value;
+                }
+            }
+
+            obj = obj[comp];
+        }
+
+        return obj;
+    }
+
   $.fn.restAdmin = function(options) {
 
     var container = this;
@@ -439,7 +481,7 @@
         var row = $('<tr data-role="row"></tr>');
         var first = true;
         eachColumn(function(column) {
-          var val = options.types[column.type].listText(column, datum[column.name]);
+          var val = options.types[column.type].listText(column, traverse(datum, column.name));
           var td = $('<td></td>');
           td.addClass(column.name);
           if (first)
@@ -450,7 +492,7 @@
             }
             first = false;
           }
-          var text = options.types[column.type].listText(column, datum[column.name]);
+          var text = options.types[column.type].listText(column, traverse(datum, column.name));
           td.append(text);
           row.append(td);
         });
@@ -515,11 +557,11 @@
           // be an empty array).
           if (column.defaultValue !== undefined)
           {
-            datum[column.name] = column.defaultValue;
+            traverse(datum, column.name, column.defaultValue);
           }
           else
           {
-            datum[column.name] = options.types[column.type].defaultValue;
+            traverse(datum, column.name, options.types[column.type].defaultValue);
           }
         });
       }
@@ -530,7 +572,7 @@
         fieldset.append(arrow);
         column.arrow = arrow;
         fieldset.find('[data-role="label"]').text(column.label);
-        var control = options.types[column.type].control(column, datum[column.name]);
+        var control = options.types[column.type].control(column, traverse(datum, column.name));
         control.attr('data-column', column.name);
         if (column.type == ('checkbox' || 'radio')) {
           fieldset.find('label').prepend(control).addClass(column.type);
@@ -555,7 +597,7 @@
         eachColumn(function(column) {
           // Some types just update the datum directly
           updateColumn(datum, column);
-          if (column.required && (!datum[column.name]))
+          if (column.required && (!traverse(datum, column.name)))
           {
             column.arrow.show();
             // Flag missing items
@@ -658,9 +700,9 @@
         if (!type.selfUpdating)
         {
           if (type.getValue) {
-            datum[column.name] = type.getValue(column, form.find('[data-column="' + column.name + '"]'));
+              traverse(datum, column.name, type.getValue(column, form.find('[data-column="' + column.name + '"]')));
           } else {
-            datum[column.name] = form.find('[data-column="' + column.name + '"]').val();
+              traverse(datum, column.name, form.find('[data-column="' + column.name + '"]').val());
           }
         }
       }
@@ -669,7 +711,7 @@
     function isDuplicate(datum, column)
     {
       return _.any(options.data, function(item) {
-        return ((datum[column.name] === item[column.name]) && (datum[idColumn] !== item[idColumn]));
+        return ((traverse(datum, column.name) === item[column.name]) && (datum[idColumn] !== item[idColumn]));
       });
     }
   };

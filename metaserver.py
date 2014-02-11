@@ -23,7 +23,9 @@ import bson
 import uuid
 import time
 from optparse import OptionParser
-from flask import Flask, Response, render_template
+from werkzeug.utils import cached_property
+from werkzeug.wrappers import Request
+from flask import Flask, Response, render_template, make_response
 from flask import session, request, redirect, url_for, current_app, abort, jsonify
 import pymongo
 
@@ -210,6 +212,9 @@ SPECIFIC_QUERYMAPS = {
     'annotationtypes': {
     },
     'userinfo': {
+    },
+    'packages': {
+        'media': 'main_media.id-ref'
     }
 }
 
@@ -245,10 +250,21 @@ def element_list(collection):
 @app.route(API_PREFIX + 'annotationtype/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'annotationtypes'})
 @app.route(API_PREFIX + 'media/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'medias'})
 @app.route(API_PREFIX + 'userinfo/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'userinfo'})
+@app.route(API_PREFIX + 'meta/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'packages'})
 def element_get(eid, collection):
     el = db[collection].find_one({ 'id': eid })
     if el is None:
         abort(404)
+    if request.method == 'PUT':
+        # FIXME Do some sanity checks before storing
+        if request.headers.get('content-type') == 'application/json':
+            data = json.loads(request.data)
+            if data['id'] != el['id']:
+                abort(500)
+            data['_id'] = el['_id']
+            db[collection].save(clean_json(data))
+            return make_response("Resource updated.", 201)
+        abort(500)
     return current_app.response_class(json.dumps(el, indent=None if request.is_xhr else 2, cls=MongoEncoder),
                                       mimetype='application/json')
 

@@ -18,6 +18,7 @@
 <script type="text/javascript" src="/static/jquery.dataTables.min.js"></script>
 <script type="text/javascript">
     $(function() {
+        var table_init_count = 0;
         $('#media-listing').restAdmin({
             url: '/api/media',
             schema: [
@@ -26,7 +27,8 @@
                     type: "text",
                     label: "id",
                     unique: true,
-                    required: true
+                    required: true,
+                    readOnly: true
                 },
                 {
                     name: "url",
@@ -79,18 +81,73 @@
                 }
             ]
         });
+        $('#package-listing').restAdmin({
+            url: '/api/meta',
+            schema: [
+                {
+                    name: "id",
+                    type: "text",
+                    label: "id",
+                    unique: true,
+                    required: true,
+                    readOnly: true
+                },
+                {
+                    name: "dc:title",
+                    type: "text",
+                    label: "Title"
+                },
+                {
+                    name: "dc:description",
+                    type: "text",
+                    label: "description"
+                },
+                {
+                    name: "main_media.id-ref",
+                    type: "text",
+                    label: "main media"
+                },
+                {
+                    name: "dc:creator",
+                    type: "text",
+                    label: "creator"
+                },
+                {
+                    name: "dc:created",
+                    type: "text",
+                    label: "created"
+                },
+                {
+                    name: "dc:contributor",
+                    type: "text",
+                    label: "contributor"
+                },
+                {
+                    name: "dc:modified",
+                    type: "text",
+                    label: "modified"
+                }
+            ]
+        });
+
+        $(document).on('jraRefreshedList', function () {
+            table_init_count = table_init_count + 1;
+            console.log(table_init_count);
+            if (table_init_count > 1) {
+                $("table").dataTable({
+                    "bPaginate": false,
+                    "bLengthChange": false,
+                    "iDisplayLength": 100,
+                    "bFilter": true,
+                    "bSort": true,
+                    "bInfo": true,
+                    "bAutoWidth": true });
+                table_init_count = 0;
+            };
+        });
+
     });
 
-  $(document).on('jraRefreshedList', function () {
-      $("table").dataTable({
-          "bPaginate": false,
-          "bLengthChange": false,
-          "iDisplayLength": 100,
-          "bFilter": true,
-          "bSort": true,
-          "bInfo": true,
-          "bAutoWidth": true });
-  });
 
 </script>
 

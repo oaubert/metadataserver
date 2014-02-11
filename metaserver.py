@@ -286,7 +286,7 @@ def package_get(pid):
         abort(404)
     p = restore_json({ 'meta': meta })
     # Fetch corresponding medias, annotation-types and annotations
-    mid = p['main_media']['id-ref']
+    mid = p['meta']['main_media']['id-ref']
     media = db['medias'].find_one({ 'id': mid })
     if media is not None:
         p['medias'] = [ restore_json(media) ]

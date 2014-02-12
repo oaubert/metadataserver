@@ -11,11 +11,17 @@
 
     <body>
         <h1>{{ package.dc_title }}</h1>
+        <div id="SlideContainer">
+          <h2 class="Ldt-DisplayImage-Title"><img title="Titre" alt="Titre" src="imagecache/00.png"></h2>
+        </div>
         <div id="LdtPlayer"></div>
         <div id="toc">
           <h3>Slides</h3>
           <div id="AnnotationsListContainer"></div>
         </div>
+        <footer>
+          <div id="license"><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/MovingImage" property="dct:title" rel="dct:type">{{ package.dc_title }}</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">{{ package.dc_title }}</span> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by/4.0/88x31.png" /></a></div>
+        </footer>
         <script type="text/javascript">
 IriSP.libFiles.defaultDir = "/static/libs/";
 IriSP.widgetsDir = "/static/metadataplayer";
@@ -23,12 +29,16 @@ var _metadata = {
     url: "/api/package/{{ package.id }}",
     format: 'ldt'
 };
-var adapt_video = function (url) {
-    
-};
-
+          var videoname = "{{ media.url }}";
+          var res = /(.+)\.(\w\w\w)$/.exec(videoname);
+          var v = document.createElement("video");
+          if (v && v.canPlayType && v.canPlayType("video/mp4")) {
+              videoname = res[1] + ".mp4";
+          } else {
+              videoname = res[1] + ".ogv";
+          }
 var _config = {
-    width : 800,
+    width : 400,
     container : 'LdtPlayer',
     default_options: {
         metadata: _metadata
@@ -36,29 +46,33 @@ var _config = {
     css : '/static/metadataplayer/LdtPlayer-core.css',
     widgets: [
           {
-            type: "HtmlPlayer",
-            video: "{{ media.url }}"
+              type: "HtmlPlayer",
+              video: videoname,
           },
           { type: "Mediafragment"},
           { type: "Slider" },
           { type: "Controller",
-            disable_annotate_btn: false }, 
+            disable_annotate_btn: false },
           { type: "MultiSegments",
             annotation_start_minimized: false,
             show_all: true },
-         { type: "CreateAnnotation",
-           show_slice: true,
-           show_arrow: true,
-           show_creator_field: false,
-           show_title_field: false,
-           api_endpoint_template: "/api/annotation",
-           polemics: [] },
+          { type: "CreateAnnotation",
+            show_slice: true,
+            show_arrow: true,
+            show_creator_field: false,
+            show_title_field: false,
+            api_endpoint_template: "/api/annotation",
+            polemics: [] },
           {
               type: "AnnotationsList",
               container: "AnnotationsListContainer",
               annotation_type: "Slides",
-              limit_count: 60,
+              limit_count: 120,
               show_audio: false
+          },
+          {
+              type: "DisplayImage",
+              container: "SlideContainer"
           }
           ]
           };

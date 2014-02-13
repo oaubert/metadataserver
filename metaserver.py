@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 #
-# This file is part of MetaServer
+# This file is part of MetaDataServer
 #
 # MetaServer is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as
@@ -16,6 +16,12 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with MetaServer.  If not, see <http://www.gnu.org/licenses/>.
 #
+"""MetaDataServer - a simple server for MetaDataPlayer
+
+This is a basic implementation of a read/write data server for the
+MetaDataPlayer component from IRI.
+It stores the annotation information in a mongo database.
+"""
 
 import os
 import json

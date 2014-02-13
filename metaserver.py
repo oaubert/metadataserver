@@ -39,10 +39,8 @@ API_PREFIX = '/api/'
 
 # Server configuration
 CONFIG = {
-    # Enable debug. This implicitly disallows external access
+    # Enable debug.
     'enable_debug': False,
-    # Run the server in external access mode (i.e. not only localhost)
-    'allow_external_access': True,
 }
 
 connection = pymongo.Connection("localhost", 27017)
@@ -403,12 +401,9 @@ if __name__ == "__main__":
     parser=OptionParser(usage="""Trace server.\n%prog [options]""")
 
     parser.add_option("-d", "--debug", dest="enable_debug", action="store_true",
-                      help="Enable debug. This implicitly disallows external access.",
-                      default=False)
+                      help="Enable debug mode.", default=False)
 
     (options, args) = parser.parse_args()
-    if options.enable_debug:
-        options.allow_external_access = False
     CONFIG.update(vars(options))
 
     if args and args[0] == 'shell':

@@ -22,6 +22,7 @@ import json
 import bson
 import uuid
 import time
+import datetime
 from optparse import OptionParser
 from werkzeug.utils import cached_property
 from werkzeug.wrappers import Request
@@ -99,6 +100,8 @@ def clean_json(data, mapping=None):
 def restore_json(data):
     """Restore valid json from a cleaned json
     """
+    if data is None:
+        return None
     # For any element
     meta = data.get('meta', {})
     for n in ('dc:created_contents', 'dc:creator_contents'):
@@ -114,6 +117,31 @@ def uncolon(data):
         if isinstance(v, dict):
             uncolon(v)
     return data
+
+def normalize_annotation(data):
+    m = data['meta']
+    if 'created' in m:
+        m['dc:created'] = m['dc:modified'] = m['created']
+        m['dc:creator'] = m['dc:contributor'] = m['creator']
+        del m['creator'], m['created']
+    if not 'dc:created' in m:
+        m['dc:created'] = m['dc:modified'] = datetime.datetime.now().isoformat()
+        # FIXME: get creator/contributor for session info
+        m['dc: creator'] = m['dc:contributor'] = 'system'
+    if not 'id-ref' in m and 'type_title' in data:
+        at = restore_json(db['annotationtypes'].find_one({ 'dc:title': data['type_title'] }))
+        if not at:
+            # Automatically create missing annotation type
+            at = clean_json({
+                "dc:contributor": "system",
+                "dc:creator": "system",
+                "dc:title": data['type_title'],
+                "dc:description": "",
+                "dc:modified": m['dc:created'],
+                "dc:created": m['dc:created']
+            })
+            db['annotationtypes'].save(at)
+        m['id-ref'] = at['id']
 
 @app.errorhandler(401)
 def custom_401(error):
@@ -228,8 +256,10 @@ def element_list(collection):
     if request.method == 'POST':
         # FIXME: do some sanity checks here (valid properties, existing ids...)
         # Insert a new element
-        data = clean_json(request.json)
-        db[collection].save(data)
+        data = request.json
+        if collection == 'annotations':
+            normalize_annotation(data)
+        db[collection].save(clean_json(request.json))
         return jsonify(id=data['id'])
     else:
         querymap = { 'user': 'meta.dc:contributor',
@@ -262,6 +292,9 @@ def element_get(eid, collection):
             if data['id'] != el['id']:
                 abort(500)
             data['_id'] = el['_id']
+            if collection == 'annotations':
+                # Fix missing/wrong fields
+                normalize_annotation(data)
             db[collection].save(clean_json(data))
             return make_response("Resource updated.", 201)
         abort(500)

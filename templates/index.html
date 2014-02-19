@@ -1,11 +1,24 @@
 <!doctype html>
 <head>
   <title>Metadata Server</title>
+  <style type="text/css">
+    header {
+    position: fixed;
+    top: 0px;
+    width: 100%;
+    background-color: #999;
+    }
+    #loginName {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    }
+  </style>
 </head>
 <body>
 <header>
   {% if userinfo %}
-  <p>Hello {{ userinfo.login }}!</p>
+  <p id="loginName">{{ userinfo.login }}</p>
   {% endif %}
 </header>
 <h1>Package listing</h1>

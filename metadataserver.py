@@ -153,23 +153,26 @@ def custom_401(error):
 
 @app.route("/")
 def index():
-    if 'userinfo' in session:
-        #return 'Logged in as : %s' % escape(session['navigator'])
-        #session['navigator']['id']="test";
-        packages = list(db['packages'].find())
-        for p in packages:
-            uncolon(p)
-            media = db['medias'].find_one({'id': p['main_media']['id-ref']})
-            if media:
-                p['main_media'].update(uncolon(media))
-            p['annotations'] = list(db['annotations'].find({'media': p['main_media']['id-ref']}))
-            for a in p['annotations']:
-                uncolon(a)
-        return render_template('index.html',
-                               userinfo=session['userinfo'],
-                               packages=packages
-                           )
-    return 'You are not logged in'
+    #return 'Logged in as : %s' % escape(session['navigator'])
+    #session['navigator']['id']="test";
+    if not 'userinfo' in session:
+        # Autologin
+        session['userinfo'] = { 'login': 'anonymous' }
+        session['userinfo'].setdefault('id', str(uuid.uuid1()))
+        db['userinfo'].save(dict(session['userinfo']))
+    packages = list(db['packages'].find())
+    for p in packages:
+        uncolon(p)
+        media = db['medias'].find_one({'id': p['main_media']['id-ref']})
+        if media:
+            p['main_media'].update(uncolon(media))
+        p['annotations'] = list(db['annotations'].find({'media': p['main_media']['id-ref']}))
+        for a in p['annotations']:
+            uncolon(a)
+    return render_template('index.html',
+                           userinfo=session.get('userinfo'),
+                           packages=packages
+                       )
 
 @app.route("/package/")
 def packages_view():

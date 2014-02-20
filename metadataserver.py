@@ -416,4 +416,4 @@ if __name__ == "__main__":
     if CONFIG['enable_debug']:
         app.run(debug=True)
     else:
-        app.run(debug=False)
+        app.run(debug=False, host='0.0.0.0')

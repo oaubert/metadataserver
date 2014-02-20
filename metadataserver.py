@@ -160,6 +160,8 @@ def index():
         session['userinfo'] = { 'login': 'anonymous' }
         session['userinfo'].setdefault('id', str(uuid.uuid1()))
         db['userinfo'].save(dict(session['userinfo']))
+@app.route("/package/")
+def packages_view():
     packages = list(db['packages'].find())
     for p in packages:
         uncolon(p)
@@ -169,16 +171,6 @@ def index():
         p['annotations'] = list(db['annotations'].find({'media': p['main_media']['id-ref']}))
         for a in p['annotations']:
             uncolon(a)
-    return render_template('index.html',
-                           userinfo=session.get('userinfo'),
-                           packages=packages
-                       )
-
-@app.route("/package/")
-def packages_view():
-    packages = list(db['packages'].find())
-    for p in packages:
-        p['media'] = db['medias'].find_one({ 'id': p['main_media']['id-ref'] })
     return render_template('packages.html', packages=packages)
 
 @app.route("/package/<string:pid>/")

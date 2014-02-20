@@ -11,9 +11,6 @@
 
     <body>
         <h1>{{ package.dc_title }}</h1>
-        <div id="SlideContainer">
-          <h2 class="Ldt-DisplayImage-Title"><img title="Titre" alt="Titre" src="imagecache/00.png"></h2>
-        </div>
         <div id="LdtPlayer"></div>
         <div id="toc">
           <h3>Slides</h3>
@@ -46,8 +43,9 @@ var _config = {
     css : '/static/metadataplayer/LdtPlayer-core.css',
     widgets: [
           {
-              type: "HtmlPlayer",
+              type: "SlideVideoPlayer",
               video: videoname,
+              width: '100%'
           },
           { type: "Mediafragment"},
           { type: "Slider" },
@@ -69,10 +67,6 @@ var _config = {
               annotation_type: "Slides",
               limit_count: 120,
               show_audio: false
-          },
-          {
-              type: "DisplayImage",
-              container: "SlideContainer"
           }
           ]
           };

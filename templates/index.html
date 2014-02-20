@@ -21,15 +21,10 @@
   <p id="loginName">{{ userinfo.login }}</p>
   {% endif %}
 </header>
-<h1>Package listing</h1>
+<h1>Server index</h1>
 <ul>
-{% for p in packages %}
-<li><a href="/package/{{ p.id }}">{{ p.dc_title }}</a> - {{ p.annotations|length }}
-  annotation(s) - media <a href="{{ p.main_media.url }}">{{ p.main_media.meta.dc_title }}</a>
-</li>
-{% else %}
-<li>No package</li>
-{% endfor %}
+  <li><a href="/package/">Package listing</a></li>
+  <li><a href="/admin/">Admin interface</a></li>
 </ul>
 </body>
 

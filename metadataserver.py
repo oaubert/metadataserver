@@ -160,6 +160,8 @@ def index():
         session['userinfo'] = { 'login': 'anonymous' }
         session['userinfo'].setdefault('id', str(uuid.uuid1()))
         db['userinfo'].save(dict(session['userinfo']))
+    return render_template('index.html',userinfo=session.get('userinfo'))
+
 @app.route("/package/")
 def packages_view():
     packages = list(db['packages'].find())

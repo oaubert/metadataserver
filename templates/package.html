@@ -26,14 +26,6 @@ var _metadata = {
     url: "/api/package/{{ package.id }}",
     format: 'ldt'
 };
-          var videoname = "{{ media.url }}";
-          var res = /(.+)\.(\w\w\w)$/.exec(videoname);
-          var v = document.createElement("video");
-          if (v && v.canPlayType && v.canPlayType("video/mp4")) {
-              videoname = res[1] + ".mp4";
-          } else {
-              videoname = res[1] + ".ogv";
-          }
 var _config = {
     width : '80%',
     container : 'LdtPlayer',
@@ -44,8 +36,19 @@ var _config = {
     widgets: [
           {
               type: "SlideVideoPlayer",
-              video: videoname,
-              width: '100%'
+              video: "{{ media.url }}",
+              width: '100%',
+              url_transform: function(n) {
+                  var elements = /(.+)\.(\w\w\w)$/.exec(n);
+                  var videoname = null;
+                  var v = document.createElement("video");
+                  if (v && v.canPlayType && v.canPlayType("video/mp4")) {
+                      videoname = elements[1] + ".mp4";
+                  } else {
+                      videoname = elements[1] + ".ogv";
+                  }
+                  return videoname;
+              }
           },
           { type: "Mediafragment"},
           { type: "Slider" },

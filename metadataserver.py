@@ -36,9 +36,8 @@ from flask import Flask, Response, render_template, make_response
 from flask import session, request, redirect, url_for, current_app, abort, jsonify
 import pymongo
 
-# PARAMETRES
+# PARAMETERS
 # DB = DataBase
-# COL= Collection
 DB   	  = 'mds'
 
 API_PREFIX = '/api/'
@@ -62,6 +61,8 @@ class MongoEncoder(json.JSONEncoder):
             return json.JSONEncoder.default(obj, **kwargs)
 
 def fix_ids(data, mapping=None):
+    """Generate UUIDs when importing data with possibly non-unique ids.
+    """
     if mapping is None:
         mapping = {}
     if not 'id' in data:
@@ -75,7 +76,8 @@ def fix_ids(data, mapping=None):
 def clean_json(data, mapping=None):
     """Clean the input json.
 
-    Mongo does not accept dots in attribute names.
+    - Mongo does not accept dots in attribute names.
+    - Convert mapped ids
     """
     if mapping is None:
         mapping = {}
@@ -102,7 +104,7 @@ def clean_json(data, mapping=None):
     return data
 
 def restore_json(data):
-    """Restore valid json from a cleaned json
+    """Restore valid json from a cleaned json.
     """
     if data is None:
         return None
@@ -115,6 +117,10 @@ def restore_json(data):
     return data
 
 def uncolon(data):
+    """Remove colons from data property names.
+
+    jinja/mustache templates do not allow to use colons in expressions.
+    """
     for n,v in list(data.iteritems()):
         if ':' in n:
             data[n.replace(':', '_')] = v
@@ -123,6 +129,8 @@ def uncolon(data):
     return data
 
 def normalize_annotation(data):
+    """Fill missing data for created annotations.
+    """
     m = data['meta']
     if 'created' in m:
         m['dc:created'] = m['dc:modified'] = m['created']
@@ -153,8 +161,6 @@ def custom_401(error):
 
 @app.route("/")
 def index():
-    #return 'Logged in as : %s' % escape(session['navigator'])
-    #session['navigator']['id']="test";
     if not 'userinfo' in session:
         # Autologin
         session['userinfo'] = { 'login': 'anonymous' }
@@ -247,13 +253,16 @@ SPECIFIC_QUERYMAPS = {
     }
 }
 
-
 @app.route(API_PREFIX + 'annotation', methods= [ 'GET', 'POST' ], defaults={'collection': 'annotations'})
 @app.route(API_PREFIX + 'annotationtype', methods= [ 'GET', 'POST' ], defaults={'collection': 'annotationtypes'})
 @app.route(API_PREFIX + 'media', methods= [ 'GET', 'POST' ], defaults={'collection': 'medias'})
 @app.route(API_PREFIX + 'userinfo', methods= [ 'GET', 'POST' ], defaults={'collection': 'userinfo'})
 @app.route(API_PREFIX + 'meta', methods= [ 'GET', 'POST' ], defaults={'collection': 'packages'})
 def element_list(collection):
+    """Generic element listing method.
+
+    It handles GET and POST requests on element collections.
+    """
     if request.method == 'POST':
         # FIXME: do some sanity checks here (valid properties, existing ids...)
         # Insert a new element
@@ -283,6 +292,11 @@ def element_list(collection):
 @app.route(API_PREFIX + 'userinfo/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'userinfo'})
 @app.route(API_PREFIX + 'meta/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'packages'})
 def element_get(eid, collection):
+    """Generic element access.
+
+    It handles GET and PUT requests on element instances.
+    Note that /package/ is handled on its own, since we regenerate data by aggregating different elements.
+    """
     el = db[collection].find_one({ 'id': eid })
     if el is None:
         abort(404)

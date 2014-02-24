@@ -1,0 +1,22 @@
+Install instructions
+====================
+
+Requirements
+------------
+
+The metadataserver server requires python-flask (>= 0.10.1) and
+python-pymongo.
+
+The client code requires a modified version of MetaDataPlayer that is
+available from https://github.com/oaubert/metadataplayer
+The symbolic links in *static/* to *metadataplayer* and *libs* must be
+fixed (or the files must be copied) from the *test/* directory of
+*metadataplayer*.
+
+Running
+-------
+
+A single option *-d* exists, to run the server in debug mode (with
+better error messages and code autoreload).
+
+

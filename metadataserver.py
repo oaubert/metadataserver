@@ -1,6 +1,8 @@
 #! /usr/bin/python
 
 #
+# Copyright (C) 2014 Olivier Aubert <contact@olivieraubert.net>
+#
 # This file is part of MetaDataServer
 #
 # MetaDataServer is free software: you can redistribute it and/or modify it

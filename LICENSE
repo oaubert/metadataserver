@@ -1,0 +1,53 @@
+* MetaDataServer
+
+MetaDataServer is free software: you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+MetaDataServer is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with MetaDataServer.  If not, see <http://www.gnu.org/licenses/>.
+
+* It uses the following components
+
+** jquery
+
+jQuery v2.0.3 | (c) 2005, 2013 jQuery Foundation, Inc. | jquery.org/license
+
+** underscore
+
+Underscore.js 1.1.6
+(c) 2011 Jeremy Ashkenas, DocumentCloud Inc.
+Underscore is freely distributable under the MIT license.
+Portions of Underscore are inspired or borrowed from Prototype,
+Oliver Steele's Functional, and John Resig's Micro-Templating.
+For all details and documentation:
+http://documentcloud.github.com/underscore
+
+** DataTables
+
+File:        jquery.dataTables.min.js
+Version:     1.9.4
+Author:      Allan Jardine (www.sprymedia.co.uk)
+Info:        www.datatables.net
+
+Copyright 2008-2012 Allan Jardine, all rights reserved.
+
+This source file is free software, under either the GPL v2 license or a
+BSD style license, available at:
+  http://datatables.net/license_gpl2
+  http://datatables.net/license_bsd
+
+This source file is distributed in the hope that it will be useful, but 
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+or FITNESS FOR A PARTICULAR PURPOSE. See the license files for details.
+
+** jquery-rest-admin
+
+Uploaded from https://github.com/punkave/jquery-rest-admin
+with an unknown (ATM) licence

@@ -32,8 +32,6 @@ import uuid
 import time
 import datetime
 from optparse import OptionParser
-from werkzeug.utils import cached_property
-from werkzeug.wrappers import Request
 from flask import Flask, Response, render_template, make_response
 from flask import session, request, redirect, url_for, current_app, abort, jsonify
 import pymongo
@@ -49,6 +47,7 @@ CONFIG = {
     # Enable debug.
     'enable_debug': False,
     'enable_cross_site_requests': False,
+    'port': 5001,
 }
 
 connection = pymongo.Connection("localhost", 27017)
@@ -456,6 +455,8 @@ if __name__ == "__main__":
                       help="Enable debug mode.", default=False)
     parser.add_option("-x", "--cross-site-requests", dest="enable_cross_site_requests", action="store_true",
                       help="Enable cross site requests.", default=False)
+    parser.add_option("-p", "--port", dest="port", type="int", action="store",
+                      help="Port number", default=5001)
 
     (options, args) = parser.parse_args()
     CONFIG.update(vars(options))
@@ -465,6 +466,6 @@ if __name__ == "__main__":
         import sys; sys.exit(0)
 
     if CONFIG['enable_debug']:
-        app.run(debug=True)
+        app.run(debug=True, port=CONFIG['port'])
     else:
-        app.run(debug=False, host='0.0.0.0')
+        app.run(debug=False, host='0.0.0.0', port=CONFIG['port'])

@@ -35,3 +35,8 @@ user, media, package, type
 
 /api/package -> list of packages [GET, POST]
 /api/package/{{id}} -> main package information (mainly meta json + mds:annotation = list of URLs that are used to gather annotations) [GET, PUT]
+
+
+* Populating DB:
+
+for p in 20131*/data.json; do echo $p; curl -X POST -d @$p -H "Content-Type: application/json"  http://localhost:5000/api/package/ ; done

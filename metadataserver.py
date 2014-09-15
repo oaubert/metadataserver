@@ -48,6 +48,7 @@ API_PREFIX = '/api/'
 CONFIG = {
     # Enable debug.
     'enable_debug': False,
+    'enable_cross_site_requests': False,
 }
 
 connection = pymongo.Connection("localhost", 27017)
@@ -132,6 +133,8 @@ def uncolon(data):
 
 def normalize_annotation(data):
     """Fill missing data for created annotations.
+
+    Modify structure in-place.
     """
     m = data['meta']
     if 'created' in m:
@@ -161,8 +164,17 @@ def normalize_annotation(data):
 def custom_401(error):
     return Response('Unauthorized access', 401, {'WWWAuthenticate':'Basic realm="Login Required"'})
 
-@app.route("/")
+@app.route("/", methods= [ 'GET', 'HEAD', 'OPTIONS' ])
 def index():
+    if request.method == 'HEAD' or request.method == 'OPTIONS':
+        if CONFIG['enable_cross_site_requests']:
+            return Response('', 200, {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, GET, OPTIONS'
+            })
+        else:
+            return Response('', 200);
+
     if not 'userinfo' in session:
         # Autologin
         session['userinfo'] = { 'login': 'anonymous' }
@@ -255,7 +267,7 @@ SPECIFIC_QUERYMAPS = {
     }
 }
 
-@app.route(API_PREFIX + 'annotation', methods= [ 'GET', 'POST' ], defaults={'collection': 'annotations'})
+@app.route(API_PREFIX + 'annotation', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ], defaults={'collection': 'annotations'})
 @app.route(API_PREFIX + 'annotationtype', methods= [ 'GET', 'POST' ], defaults={'collection': 'annotationtypes'})
 @app.route(API_PREFIX + 'media', methods= [ 'GET', 'POST' ], defaults={'collection': 'medias'})
 @app.route(API_PREFIX + 'userinfo', methods= [ 'GET', 'POST' ], defaults={'collection': 'userinfo'})
@@ -265,14 +277,31 @@ def element_list(collection):
 
     It handles GET and POST requests on element collections.
     """
+    if request.method == 'HEAD' or request.method == 'OPTIONS':
+        if CONFIG['enable_cross_site_requests']:
+            return Response('', 200, {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type',
+            })
+        else:
+            return Response('', 200);
+
     if request.method == 'POST':
         # FIXME: do some sanity checks here (valid properties, existing ids...)
         # Insert a new element
         data = request.json
         if collection == 'annotations':
             normalize_annotation(data)
-        db[collection].save(clean_json(request.json))
-        return jsonify(id=data['id'])
+        db[collection].save(clean_json(data))
+        response = jsonify(**restore_json(data))
+        print "Saving data"
+        if CONFIG['enable_cross_site_requests']:
+            print "enable xsrf"
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return response
     else:
         querymap = { 'user': 'meta.dc:contributor',
                      'creator': 'meta.dc:creator' }
@@ -286,6 +315,10 @@ def element_list(collection):
                                                           indent=None if request.is_xhr else 2,
                                                           cls=MongoEncoder),
                                                mimetype='application/json')
+        if CONFIG['enable_cross_site_requests']:
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return response
 
 @app.route(API_PREFIX + 'annotation/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'annotations'})
@@ -421,6 +454,8 @@ if __name__ == "__main__":
 
     parser.add_option("-d", "--debug", dest="enable_debug", action="store_true",
                       help="Enable debug mode.", default=False)
+    parser.add_option("-x", "--cross-site-requests", dest="enable_cross_site_requests", action="store_true",
+                      help="Enable cross site requests.", default=False)
 
     (options, args) = parser.parse_args()
     CONFIG.update(vars(options))

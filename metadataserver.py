@@ -293,10 +293,11 @@ def element_list(collection):
         if collection == 'annotations':
             normalize_annotation(data)
         db[collection].save(clean_json(data))
-        response = jsonify(**restore_json(data))
-        print "Saving data"
+        response = current_app.response_class( json.dumps(restore_json(data),
+                                                          indent=None if request.is_xhr else 2,
+                                                          cls=MongoEncoder),
+                                               mimetype='application/json')
         if CONFIG['enable_cross_site_requests']:
-            print "enable xsrf"
             response.headers['Access-Control-Allow-Origin'] = '*'
             response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
             response.headers['Access-Control-Allow-Headers'] = 'Content-Type'

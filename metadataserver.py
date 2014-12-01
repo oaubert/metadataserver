@@ -313,7 +313,7 @@ def element_list(collection):
 
         query = dict( (querymap.get(name, name), value)
                       for (name, value) in ( f.split(':') for f in request.values.getlist('filter') )
-                      if 'name' in querymap
+                      if name in querymap
         )
         cursor = db[collection].find(query)
         response = current_app.response_class( json.dumps(list(restore_json(a) for a in cursor),

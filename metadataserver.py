@@ -48,6 +48,8 @@ CONFIG = {
     'enable_debug': False,
     'enable_cross_site_requests': False,
     'port': 5001,
+    # In Restricted mode, users cannot see all annotations
+    'restricted': False
 }
 
 connection = pymongo.Connection("localhost", 27017)
@@ -306,6 +308,9 @@ def element_list(collection):
         querymap = { 'user': 'meta.dc:contributor',
                      'creator': 'meta.dc:creator' }
         querymap.update(SPECIFIC_QUERYMAPS[collection])
+        if CONFIG['restricted'] and not request.values.getlist('filter'):
+            return make_response("Too generic query.", 403)
+
         query = dict( (querymap.get(name, name), value)
                       for (name, value) in ( f.split(':') for f in request.values.getlist('filter') )
                       if 'name' in querymap
@@ -458,6 +463,8 @@ if __name__ == "__main__":
                       help="Enable cross site requests.", default=False)
     parser.add_option("-p", "--port", dest="port", type="int", action="store",
                       help="Port number", default=5001)
+    parser.add_option("-r", "--restricted", dest="restricted", action="store_true",
+                      help="Restricted access", default=False)
 
     (options, args) = parser.parse_args()
     CONFIG.update(vars(options))

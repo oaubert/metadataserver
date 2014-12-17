@@ -71,7 +71,7 @@ def fix_ids(data, mapping=None):
         mapping = {}
     if not 'id' in data:
         data['id'] = str(uuid.uuid1())
-    elif len(data['id']) < 36:
+    elif len(data['id']) < 4:
         # It is not a UUID, generate one
         old = data['mds:oldid'] = data['id']
         mapping[old] = data['id'] = str(uuid.uuid1())

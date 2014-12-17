@@ -23,6 +23,8 @@
 <div id="package-listing"></div>
 <h1>Media listing</h1>
 <div id="media-listing"></div>
+<h1>Annotation-type listing</h1>
+<div id="annotationtype-listing"></div>
 <h1>Annotation listing</h1>
 <div id="annotation-listing"></div>
 
@@ -206,11 +208,54 @@
                 }
             ]
         });
+        $('#annotationtype-listing').restAdmin({
+            url: '../api/annotationtype',
+            schema: [
+                {
+                    name: "id",
+                    type: "text",
+                    label: "id",
+                    unique: true,
+                    required: true,
+                    readOnly: true
+                },
+                {
+                    name: "dc:description",
+                    type: "text",
+                    label: "Description"
+                },
+                {
+                    name: "dc:title",
+                    type: "text",
+                    label: "Title"
+                },
+                {
+                    name: "dc:creator",
+                    type: "text",
+                    label: "creator"
+                },
+                {
+                    name: "dc:created",
+                    type: "text",
+                    label: "created"
+                },
+                {
+                    name: "dc:contributor",
+                    type: "text",
+                    label: "contributor"
+                },
+                {
+                    name: "dc:modified",
+                    type: "text",
+                    label: "modified"
+                }
+            ]
+        });
 
         $(document).on('jraRefreshedList', function () {
             table_init_count = table_init_count + 1;
             console.log(table_init_count);
-            if (table_init_count > 2) {
+            if (table_init_count > 3) {
                 $("table").dataTable({
                     "paginate": true,
                     "lengthChange": false,

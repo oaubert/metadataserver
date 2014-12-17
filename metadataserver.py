@@ -330,21 +330,24 @@ def element_list(collection):
             response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return response
 
-@app.route(API_PREFIX + 'annotation/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'annotations'})
-@app.route(API_PREFIX + 'annotationtype/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'annotationtypes'})
-@app.route(API_PREFIX + 'media/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'medias'})
-@app.route(API_PREFIX + 'userinfo/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'userinfo'})
-@app.route(API_PREFIX + 'meta/<string:eid>', methods= [ 'GET', 'PUT' ], defaults={'collection': 'packages'})
+@app.route(API_PREFIX + 'annotation/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'annotations'})
+@app.route(API_PREFIX + 'annotationtype/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'annotationtypes'})
+@app.route(API_PREFIX + 'media/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'medias'})
+@app.route(API_PREFIX + 'userinfo/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'userinfo'})
+@app.route(API_PREFIX + 'meta/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'packages'})
 def element_get(eid, collection):
     """Generic element access.
 
-    It handles GET and PUT requests on element instances.
+    It handles GET/PUT/DELET requests on element instances.
     Note that /package/ is handled on its own, since we regenerate data by aggregating different elements.
     """
     el = db[collection].find_one({ 'id': eid })
     if el is None:
         abort(404)
-    if request.method == 'PUT':
+    if request.method == 'DELETE':
+        # FIXME Do some sanity checks before deleting
+        db[collection].remove({ 'id': eid }, True)
+    elif request.method == 'PUT':
         # FIXME Do some sanity checks before storing
         if request.headers.get('content-type') == 'application/json':
             data = json.loads(request.data)

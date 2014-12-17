@@ -34,6 +34,7 @@ import datetime
 from optparse import OptionParser
 from flask import Flask, Response, render_template, make_response
 from flask import session, request, redirect, url_for, current_app, abort, jsonify
+from functools import wraps
 import pymongo
 
 # PARAMETERS
@@ -63,6 +64,23 @@ class MongoEncoder(json.JSONEncoder):
             return str(obj)
         else:
             return json.JSONEncoder.default(obj, **kwargs)
+
+def jsonp(func):
+    """Wraps JSONified output for JSONP requests.
+
+    From http://flask.pocoo.org/snippets/79/
+    """
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        callback = request.args.get('callback', False)
+        if callback:
+            data = str(func(*args, **kwargs).data)
+            content = str(callback) + '(' + data + ')'
+            mimetype = 'application/javascript'
+            return current_app.response_class(content, mimetype=mimetype)
+        else:
+            return func(*args, **kwargs)
+    return decorated_function
 
 def fix_ids(data, mapping=None):
     """Generate UUIDs when importing data with possibly non-unique ids.
@@ -388,7 +406,7 @@ def user_annotation_list(uid):
                                                   indent=None if request.is_xhr else 2,
                                                   cls=MongoEncoder),
                                        mimetype='application/json')
-
+@jsonp
 @app.route(API_PREFIX + 'package/', methods= [ 'GET', 'POST' ])
 def package_list():
     if request.method == 'POST':
@@ -434,6 +452,7 @@ def package_list():
                                                mimetype='application/json')
         return response
 
+@jsonp
 @app.route(API_PREFIX + 'package/<string:pid>', methods= [ 'GET' ])
 def package_get(pid):
     meta = db['packages'].find_one({ 'id': pid })

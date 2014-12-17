@@ -190,14 +190,14 @@
             console.log(table_init_count);
             if (table_init_count > 2) {
                 $("table").dataTable({
-                    "bPaginate": false,
-                    "bLengthChange": false,
-                    "iDisplayLength": 100,
-                    "bFilter": true,
-                    "bSort": true,
-                    "bInfo": true,
-                    "dom": '<lfip<t>>',
-                    "bAutoWidth": true });
+                    "paginate": true,
+                    "lengthChange": false,
+                    "displayLength": 100,
+                    "filter": true,
+                    "sort": true,
+                    'info': true,
+                    "dom": 'fipt',
+                    "autoWidth": true });
                 table_init_count = 0;
             };
         });

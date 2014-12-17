@@ -406,7 +406,7 @@ def user_annotation_list(uid):
                                                   indent=None if request.is_xhr else 2,
                                                   cls=MongoEncoder),
                                        mimetype='application/json')
-@jsonp
+
 @app.route(API_PREFIX + 'package/', methods= [ 'GET', 'POST' ])
 def package_list():
     if request.method == 'POST':
@@ -452,7 +452,6 @@ def package_list():
                                                mimetype='application/json')
         return response
 
-@jsonp
 @app.route(API_PREFIX + 'package/<string:pid>', methods= [ 'GET' ])
 def package_get(pid):
     meta = db['packages'].find_one({ 'id': pid })
@@ -478,8 +477,13 @@ def package_get(pid):
     #        p['annotation-types'].append(restore_json(at))
     #    else:
     #        print "Error: missing annotation type"
-    return current_app.response_class(json.dumps(p, indent=None if request.is_xhr else 2, cls=MongoEncoder),
-                                      mimetype='application/json')
+    data = json.dumps(p, indent=None if request.is_xhr else 2, cls=MongoEncoder)
+    mimetype = 'application/json'    
+    callback = request.args.get('callback', False)
+    if callback:
+        data = str(callback) + '(' + data + ')'
+        mimetype = 'application/javascript'
+    return current_app.response_class(data, mimetype=mimetype)
 
 # set the secret key.  keep this really secret:
 app.secret_key = os.urandom(24)

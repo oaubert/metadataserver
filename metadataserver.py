@@ -140,6 +140,11 @@ def restore_json(data):
         if n in meta:
             meta[n.replace('_', '.')] = meta[n]
             del meta[n]
+    if "unit" in data:
+        data["http://advene.liris.cnrs.fr/ns/frame_of_reference/ms"] = "o=0"
+        data["origin"] = 0
+        meta['dc:duration'] = long(meta['dc:duration'])
+
     return data
 
 def uncolon(data):

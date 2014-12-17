@@ -37,6 +37,6 @@ nav ul {
 nav ul li {
     display: inline;
 }
-h1:first {
+h1:first-child {
     margin-top: 2em;
 }

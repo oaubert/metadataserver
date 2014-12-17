@@ -449,12 +449,16 @@ def package_get(pid):
     p['annotations'] = [ restore_json(a) for a in annotations ]
     ats = annotations.distinct('meta.id-ref')
     p['annotation-types'] = []
-    for atid in ats:
-        at = db['annotationtypes'].find_one({ 'id': atid })
-        if at is not None:
-            p['annotation-types'].append(restore_json(at))
-        else:
-            print "Error: missing annotation type"
+    # Dump all annotation types for now
+    # FIXME: find a better solution to make sure Contributions is included
+    for at in db['annotationtypes'].find():
+        p['annotation-types'].append(restore_json(at))
+    #for atid in ats:
+    #    at = db['annotationtypes'].find_one({ 'id': atid })
+    #    if at is not None:
+    #        p['annotation-types'].append(restore_json(at))
+    #    else:
+    #        print "Error: missing annotation type"
     return current_app.response_class(json.dumps(p, indent=None if request.is_xhr else 2, cls=MongoEncoder),
                                       mimetype='application/json')
 

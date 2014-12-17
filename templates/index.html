@@ -1,22 +1,17 @@
 <!doctype html>
 <head>
   <title>Metadata Server</title>
-  <style type="text/css">
-    header {
-    position: fixed;
-    top: 0px;
-    width: 100%;
-    background-color: #999;
-    }
-    #loginName {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    }
-  </style>
+  <link href='../static/metaserver.css' rel='stylesheet' type='text/css'>
 </head>
 <body>
-<header>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="../">Index</a></li>
+        <li><a href="../package/">Packages</a></li>
+        <li><a href="../admin/">Admin</a></li>
+      </ul>
+    </nav>
   {% if userinfo %}
   <p id="loginName">{{ userinfo.login }}</p>
   {% endif %}

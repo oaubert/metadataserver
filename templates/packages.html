@@ -3,10 +3,21 @@
     <head>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <link href='../static/metaserver.css' rel='stylesheet' type='text/css'>
         <title>Available packages</title>
     </head>
 
     <body>
+      <header>
+      <nav>
+        <ul>
+          <li><a href="../">Index</a></li>
+          <li><a href="../package/">Packages</a></li>
+          <li><a href="../admin/">Admin</a></li>
+        </ul>
+      </nav>
+      </header>
+
       <h1>Available packages</h1>
       <ul>
         {% for p in packages %}

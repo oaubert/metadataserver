@@ -91,8 +91,12 @@ def clean_json(data, mapping=None):
     if 'http://advene.liris.cnrs.fr/ns/frame_of_reference/ms' in data:
         del data['http://advene.liris.cnrs.fr/ns/frame_of_reference/ms']
     # For any element
-    # Author Metadata is in the meta dict (annotation, media), or in the dict itself (annotationtype, package)
     meta = data.get('meta', data)
+    # Generate created/modified if needed
+    for n in ('dc:created', 'dc:modified'):
+        if not meta.get(n):
+            meta[n] = datetime.datetime.now().isoformat()
+    # Author Metadata is in the meta dict (annotation, media), or in the dict itself (annotationtype, package)
     for n in ('dc:created.contents', 'dc:creator.contents'):
         if n in meta:
             meta[n.replace('.', '_')] = meta[n]

@@ -11,6 +11,8 @@
 <div id="package-listing"></div>
 <h1>Media listing</h1>
 <div id="media-listing"></div>
+<h1>Annotation listing</h1>
+<div id="annotation-listing"></div>
 
 <script type="text/javascript" src="../static/underscore.js"></script>
 <script type="text/javascript" src="../static/jquery.min.js"></script>
@@ -129,11 +131,64 @@
                 }
             ]
         });
+        $('#annotation-listing').restAdmin({
+            url: '../api/annotation',
+            schema: [
+                {
+                    name: "id",
+                    type: "text",
+                    label: "id",
+                    unique: true,
+                    required: true,
+                    readOnly: true
+                },
+                {
+                    name: "content.description",
+                    type: "text",
+                    label: "Description"
+                },
+                {
+                    name: "content.title",
+                    type: "text",
+                    label: "Title"
+                },
+                {
+                    name: "media",
+                    type: "text",
+                    label: "Media"
+                },
+                {
+                    name: "begin",
+                    type: "text",
+                    label: "Begin"
+                },
+                {
+                    name: "end",
+                    type: "text",
+                    label: "End"
+                },
+                {
+                    name: "type",
+                    type: "text",
+                    label: "Type"
+                },
+                {
+                    name: "meta.dc:contributor",
+                    type: "text",
+                    label: "contributor"
+                },
+                {
+                    name: "meta.dc:modified",
+                    type: "text",
+                    label: "modified"
+                }
+            ]
+        });
 
         $(document).on('jraRefreshedList', function () {
             table_init_count = table_init_count + 1;
             console.log(table_init_count);
-            if (table_init_count > 1) {
+            if (table_init_count > 2) {
                 $("table").dataTable({
                     "bPaginate": false,
                     "bLengthChange": false,
@@ -141,6 +196,7 @@
                     "bFilter": true,
                     "bSort": true,
                     "bInfo": true,
+                    "dom": '<lfip<t>>',
                     "bAutoWidth": true });
                 table_init_count = 0;
             };

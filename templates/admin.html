@@ -36,7 +36,6 @@
 <script type="text/javascript" src="../static/jquery.dataTables.min.js"></script>
 <script type="text/javascript">
     $(function() {
-        var table_init_count = 0;
         $('#media-listing').restAdmin({
             url: '../api/media?apikey={{key}}',
             schema: [
@@ -274,28 +273,22 @@
         });
 
         $(document).on('jraRefreshedList', function () {
-            table_init_count = table_init_count + 1;
-            console.log(table_init_count);
-            if (table_init_count > 3) {
-                $("table").each(function () {
-                    var mod_index = $(this).find("th").map( function (i, c) { return (c.getAttribute("class") || "").indexOf("dc:modified") < 0 ? 0 : 1; }).toArray().indexOf(1);
-                    if (mod_index < 0)
-                        mod_index = 0;
-                    $(this).dataTable({
-                        "paginate": true,
-                        "lengthChange": false,
-                        "displayLength": 50,
-                        "filter": true,
-                        "sort": true,
-                        'info': true,
-                        "order": [ mod_index, 'desc' ],
-                        "dom": 'fipt',
-                        "autoWidth": true });
-                });
-                table_init_count = 0;
-            };
+            $("table[role!=grid]").each(function () {
+                var mod_index = $(this).find("th").map( function (i, c) { return (c.getAttribute("class") || "").indexOf("dc:modified") < 0 ? 0 : 1; }).toArray().indexOf(1);
+                if (mod_index < 0)
+                    mod_index = 0;
+                $(this).dataTable({
+                    "paginate": true,
+                    "lengthChange": false,
+                    "displayLength": 50,
+                    "filter": true,
+                    "sort": true,
+                    'info': true,
+                    "order": [ mod_index, 'desc' ],
+                    "dom": 'fipt',
+                    "autoWidth": true });
+            });
         });
-
     });
 
 

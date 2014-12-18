@@ -49,8 +49,6 @@ CONFIG = {
     'enable_debug': False,
     'enable_cross_site_requests': False,
     'port': 5001,
-    # In Restricted mode, users cannot see all annotations
-    'restricted': False
 }
 
 connection = pymongo.Connection("localhost", 27017)
@@ -620,8 +618,6 @@ if __name__ == "__main__":
                       help="Enable cross site requests.", default=False)
     parser.add_option("-p", "--port", dest="port", type="int", action="store",
                       help="Port number", default=5001)
-    parser.add_option("-r", "--restricted", dest="restricted", action="store_true",
-                      help="Restricted access", default=False)
 
     (options, args) = parser.parse_args()
     CONFIG.update(vars(options))

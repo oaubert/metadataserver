@@ -82,7 +82,7 @@ def check_capability(key, actions):
     etc...
 
     Admin rights correspond to:
-    ['GETadmin', 'GETelements', 'GETelement', 'PUTelement', 'POSTelements', 'POSTelement', 'GETunfilteredelements']
+    ['GETadmin', 'GETelements', 'GETelement', 'PUTelement', 'DELETEelement', 'POSTelements', 'POSTelement', 'GETunfilteredelements', 'GETkeys', 'POSTkeys', 'GETkey', 'PUTkey', 'DELETEkey' ]
     """
     print "Check", key, ":", actions, " <-> ", APIKEYS.get(key)
     return set(actions).intersection(APIKEYS.get(key, []))

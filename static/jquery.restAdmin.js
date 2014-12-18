@@ -655,7 +655,8 @@
               // from the browser side. Think about pagination,
               // sort order, and server side cleaning of the data.
               // Discover humility. Call refresh. Om.
-              options.refreshData({ success: list });
+                list();
+                options.refreshData({ success: list });
             }
           }
         );

@@ -23,7 +23,7 @@
 IriSP.libFiles.defaultDir = "../../static/libs/";
 IriSP.widgetsDir = "../../static/metadataplayer";
 var _metadata = {
-    url: "../../api/package/{{ package.id }}",
+    url: "../../api/package/{{ package.id }}?apikey={{key}}",
     format: 'ldt'
 };
 var _config = {
@@ -64,7 +64,7 @@ var _config = {
             show_controls: true,
             show_creator_field: false,
             show_title_field: false,
-            api_endpoint_template: "../../api/annotation",
+            api_endpoint_template: "../../api/annotation?apikey={{key}}",
             polemics: [] },
           {
               type: "AnnotationsList",

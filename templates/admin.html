@@ -25,6 +25,8 @@
 <div id="media-listing"></div>
 <h1>Annotation-type listing</h1>
 <div id="annotationtype-listing"></div>
+<h1>API keys listing</h1>
+<div id="apikey-listing"></div>
 <h1>Annotation listing</h1>
 <div id="annotation-listing"></div>
 
@@ -36,7 +38,7 @@
     $(function() {
         var table_init_count = 0;
         $('#media-listing').restAdmin({
-            url: '../api/media',
+            url: '../api/media?apikey={{key}}',
             schema: [
                 {
                     name: "id",
@@ -98,7 +100,7 @@
             ]
         });
         $('#package-listing').restAdmin({
-            url: '../api/meta',
+            url: '../api/meta?apikey={{key}}',
             schema: [
                 {
                     name: "id",
@@ -146,7 +148,7 @@
             ]
         });
         $('#annotation-listing').restAdmin({
-            url: '../api/annotation{% if filter %}?filter={{ filter }}{%endif%}',
+            url: '../api/annotation?apikey={{key}}{% if filter %}&filter={{ filter }}{%endif%}',
             schema: [
                 {
                     name: "id",
@@ -209,7 +211,7 @@
             ]
         });
         $('#annotationtype-listing').restAdmin({
-            url: '../api/annotationtype',
+            url: '../api/annotationtype?apikey={{key}}',
             schema: [
                 {
                     name: "id",
@@ -248,6 +250,25 @@
                     name: "dc:modified",
                     type: "text",
                     label: "modified"
+                }
+            ]
+        });
+        $('#apikey-listing').restAdmin({
+            url: '../api/key/?apikey={{key}}',
+            id: 'key',
+            schema: [
+                {
+                    name: "key",
+                    type: "text",
+                    label: "key",
+                    unique: true,
+                    required: true,
+                    readOnly: true
+                },
+                {
+                    name: "capabilities",
+                    type: "text",
+                    label: "capabilities"
                 }
             ]
         });

@@ -58,6 +58,35 @@ db = connection[DB]
 
 app = Flask(__name__)
 
+DEFAULT_KEY = 'default'
+APIKEYS = {}
+
+def load_keys():
+    """Load API key data.
+    """
+    global APIKEYS
+    APIKEYS = {}
+    for k in list(db['apikeys'].find()):
+        APIKEYS[k['key']] = set(str(c) for c in k['capabilities'])
+
+def check_capability(key, actions):
+    """Check that the given key is authorized to execute the given actions
+
+    actions is a list (or set) of action identifier. There are generic
+    actions built from the request method and parameters, and specific
+    action with specific identifiers.
+    POSTelement
+    PUTelement
+    DELETEelement
+    DELETEannotation
+    etc...
+
+    Admin rights correspond to:
+    ['GETadmin', 'GETelements', 'GETelement', 'PUTelement', 'POSTelements', 'POSTelement', 'GETunfilteredelements']
+    """
+    print "Check", key, ":", actions, " <-> ", APIKEYS.get(key)
+    return set(actions).intersection(APIKEYS.get(key, []))
+
 class MongoEncoder(json.JSONEncoder):
     def default(self, obj, **kwargs):
         if isinstance(obj, bson.ObjectId):
@@ -194,6 +223,7 @@ def custom_401(error):
 
 @app.route("/", methods= [ 'GET', 'HEAD', 'OPTIONS' ])
 def index():
+    key = request.values.get('apikey', '')
     if request.method == 'HEAD' or request.method == 'OPTIONS':
         if CONFIG['enable_cross_site_requests']:
             return Response('', 200, {
@@ -208,10 +238,14 @@ def index():
         session['userinfo'] = { 'login': 'anonymous' }
         session['userinfo'].setdefault('id', str(uuid.uuid1()))
         db['userinfo'].save(dict(session['userinfo']))
-    return render_template('index.html',userinfo=session.get('userinfo'))
+    return render_template('index.html',userinfo=session.get('userinfo'), key=key)
 
 @app.route("/package/")
 def packages_view():
+    key = request.values.get('apikey') or DEFAULT_KEY
+    if not check_capability(key, [ "%s%s" % (request.method, el) for el in ('elements', 'packages')]):
+        return make_response("Invalid API key", 403)
+
     packages = list(db['packages'].find())
     for p in packages:
         uncolon(p)
@@ -221,15 +255,18 @@ def packages_view():
         p['annotations'] = list(db['annotations'].find({'media': p['main_media']['id-ref']}))
         for a in p['annotations']:
             uncolon(a)
-    return render_template('packages.html', packages=packages)
+    return render_template('packages.html', packages=packages, key=key)
 
 @app.route("/package/<string:pid>/")
 def package_view(pid):
+    key = request.values.get('apikey') or DEFAULT_KEY
+    if not check_capability(key, [ "%s%s" % (request.method, el) for el in ('element', 'package')]):
+        return make_response("Invalid API key", 403)
     package = db['packages'].find_one({ 'id': pid })
     if package is None:
         abort(404)
     media = db['medias'].find_one({ 'id': package['main_media']['id-ref'] })
-    return render_template('package.html', package=uncolon(package), media=media)
+    return render_template('package.html', package=uncolon(package), media=media, key=key)
 
 @app.route("/package/<string:pid>/imagecache/<path:info>")
 def imagecache_view(pid, info):
@@ -237,7 +274,10 @@ def imagecache_view(pid, info):
 
 @app.route("/admin/")
 def admin_view():
-    return render_template('admin.html', filter=request.values.get('filter', ''))
+    key = request.values.get('apikey') or DEFAULT_KEY
+    if not check_capability(key, [ "GETadmin" ]):
+        return make_response("Invalid API key", 403)
+    return render_template('admin.html', filter=request.values.get('filter', ''), key=key)
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
@@ -245,7 +285,6 @@ def login():
     # field, whose value contains JSON data with information about
     # the user
     params = request.values.get('default_user', '{"login": "anonymous"}')
-
     if 'userinfo' in session:
         # session was already initialized. Update its information.
         d = json.loads(params)
@@ -305,6 +344,7 @@ def element_list(collection):
 
     It handles GET and POST requests on element collections.
     """
+    key = request.values.get('apikey') or DEFAULT_KEY
     if request.method == 'HEAD' or request.method == 'OPTIONS':
         if CONFIG['enable_cross_site_requests']:
             return Response('', 200, {
@@ -316,6 +356,8 @@ def element_list(collection):
             return Response('', 200);
 
     if request.method == 'POST':
+        if not check_capability(key, [ "POST%s" % el for el in ('elements', collection)]):
+            return make_response("Invalid API key", 403)
         # FIXME: do some sanity checks here (valid properties, existing ids...)
         # Insert a new element
         data = request.json
@@ -332,10 +374,12 @@ def element_list(collection):
             response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return response
     else:
+        if not check_capability(key, [ "GET%s" % el for el in ('elements', collection) ]):
+            return make_response("Invalid API key", 403)
         querymap = { 'user': 'meta.dc:contributor',
                      'creator': 'meta.dc:creator' }
         querymap.update(SPECIFIC_QUERYMAPS[collection])
-        if CONFIG['restricted'] and not request.values.getlist('filter'):
+        if not request.values.getlist('filter') and not check_capability(key, [ "GETunfiltered%s" % el for el in ('elements', collection) ]):
             return make_response("Too generic query.", 403)
 
         query = dict( (querymap.get(name, name), value)
@@ -361,9 +405,12 @@ def element_list(collection):
 def element_get(eid, collection):
     """Generic element access.
 
-    It handles GET/PUT/DELET requests on element instances.
+    It handles GET/PUT/DELETE requests on element instances.
     Note that /package/ is handled on its own, since we regenerate data by aggregating different elements.
     """
+    key = request.values.get('apikey') or DEFAULT_KEY
+    if not check_capability(key, [ "%s%s" % (request.method, el) for el in ('element', collection.rstrip("s"))]):
+        return make_response("Invalid API key", 403)
     el = db[collection].find_one({ 'id': eid })
     if el is None:
         abort(404)
@@ -391,6 +438,9 @@ def element_get(eid, collection):
 def user_list():
     """Enumerate contributing users.
     """
+    key = request.values.get('apikey') or DEFAULT_KEY
+    if not check_capability(key, [ "%s%s" % (request.method, el) for el in ('element', 'users')]):
+        return make_response("Invalid API key", 403)
     users = { }
     for collection in ('annotations', 'medias', 'packages', 'annotationtypes'):
         if collection in ('annotations', 'medias'):
@@ -405,8 +455,69 @@ def user_list():
                                        cls=MongoEncoder),
                                        mimetype='application/json')
 
+@app.route(API_PREFIX + 'key/', methods= [ 'GET', 'POST' ])
+def key_list():
+    """Enumerate API keys.
+    """
+    key = request.values.get('apikey') or DEFAULT_KEY
+    if not check_capability(key, [ "%s%s" % (request.method, el) for el in ('admin', 'keys') ]):
+        return make_response("Invalid API key", 403)
+    if request.method == 'POST':
+        # Create a new key
+        data = json.loads(request.data)
+        if data.get('key') and data.get('capabilities'):
+            db['apikeys'].insert({ 'key': data.get('key'),
+                                   'capabilities': data.get('capabilities').split(',') })
+            load_keys()
+            return current_app.response_class( json.dumps(data,
+                                               indent=None if request.is_xhr else 2,
+                                               cls=MongoEncoder),
+                                               mimetype='application/json')
+        else:
+            abort(401)
+    else:
+        return current_app.response_class( json.dumps(list(db['apikeys'].find()),
+                                                      indent=None if request.is_xhr else 2,
+                                                      cls=MongoEncoder),
+                                           mimetype='application/json')
+
+@app.route(API_PREFIX + 'key/<string:k>', methods= [ 'GET', 'PUT', 'DELETE' ])
+def key_get(k):
+    """Key access
+
+    It handles GET/PUT/DELETE requests on API keys
+    """
+    key = request.values.get('apikey') or DEFAULT_KEY
+    if not check_capability(key, [ "%s%s" % (request.method, el) for el in ('admin', 'key') ]):
+        return make_response("Invalid API key", 403)
+    el = db['apikeys'].find_one({ 'key': k })
+    if el is None:
+        abort(404)
+    if request.method == 'DELETE':
+        # FIXME Do some sanity checks before deleting
+        db['apikeys'].remove({ 'key': k }, True)
+        load_keys()
+    elif request.method == 'PUT':
+        # FIXME Do some sanity checks before storing
+        if request.headers.get('content-type') == 'application/json':
+            data = json.loads(request.data)
+            if data['key'] != el['key']:
+                abort(500)
+            data['_id'] = el['_id']
+            data['capabilities'] = data['capabilities'].split(',')
+            db['apikeys'].save(data)
+            load_keys()
+            return make_response("Resource updated.", 201)
+        abort(500)
+    # GET
+    return current_app.response_class(json.dumps(el, indent=None if request.is_xhr else 2, cls=MongoEncoder),
+                                      mimetype='application/json')
+
 @app.route(API_PREFIX + 'user/<string:uid>/annotation', methods= [ 'GET' ])
 def user_annotation_list(uid):
+    key = request.values.get('apikey') or DEFAULT_KEY
+    if not check_capability(key, [ "GET%s" % el for el in ('elements', 'userannotations')]):
+        return make_response("Invalid API key", 403)
     return current_app.response_class( json.dumps(list(db['annotations'].find({'meta.dc:creator': uid})),
                                                   indent=None if request.is_xhr else 2,
                                                   cls=MongoEncoder),
@@ -414,6 +525,9 @@ def user_annotation_list(uid):
 
 @app.route(API_PREFIX + 'package/', methods= [ 'GET', 'POST' ])
 def package_list():
+    key = request.values.get('apikey') or DEFAULT_KEY
+    if not check_capability(key, [ "%s%s" % (request.method, el) for el in ('element', 'package')]):
+        return make_response("Invalid API key", 403)
     if request.method == 'POST':
         # Insert a new package
         data = request.json
@@ -459,6 +573,10 @@ def package_list():
 
 @app.route(API_PREFIX + 'package/<string:pid>', methods= [ 'GET' ])
 def package_get(pid):
+    key = request.values.get('apikey') or DEFAULT_KEY
+    if not check_capability(key, [ "%s%s" % (request.method, el) for el in ('element', 'package')]):
+        return make_response("Invalid API key", 403)
+
     meta = db['packages'].find_one({ 'id': pid })
     if meta is None:
         abort(404)
@@ -507,6 +625,8 @@ if __name__ == "__main__":
 
     (options, args) = parser.parse_args()
     CONFIG.update(vars(options))
+
+    load_keys()
 
     if args and args[0] == 'shell':
         import pdb; pdb.set_trace()

@@ -166,7 +166,8 @@
     {
       options.create = function(datum, params)
       {
-        $.ajax(options.url, {
+          var u = options.url.split("?", 2);
+          $.ajax(options.url, {
           type: 'POST',
           data: JSON.stringify(datum),
           dataType: 'json',
@@ -183,8 +184,8 @@
     {
       options.update = function(datum, params)
         {
-            var u = options.url.split("?", 1);            
-            $.ajax(u[0] + '/' + datum[idColumn] + (u[1] ? "?" + u[1] : ""), {
+            var u = options.url.split("?", 2);
+            $.ajax(u[0] + (u[0].substr(-1) == '/' ? '' : '/') + datum[idColumn] + "?" + (u[1] || ""), {
                 type: 'PUT',
                 data: JSON.stringify(datum),
                 dataType: 'json',
@@ -215,8 +216,8 @@
     {
       options.remove = function(datum, params)
       {
-          var u = options.url.split("?", 1);            
-          $.ajax(u[0] + '/' + datum[idColumn] + (u[1] ? "?" + u[1] : ""), {
+          var u = options.url.split("?", 2);
+          $.ajax(u[0] + '/' + datum[idColumn] + "?" + (u[1] || ""), {
           type: 'DELETE',
           dataType: 'json',
           success: params.success,

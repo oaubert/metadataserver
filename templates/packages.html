@@ -21,7 +21,7 @@
       <h1>Available packages</h1>
       <ul>
         {% for p in packages %}
-        <li><a href="{{ p.id }}?apikey={{key}}">{{ p.dc_title }}</a> - {{ p.annotations|length }} annotation(s) - media <a href="{{ p.main_media.url }}">{{ p.main_media.meta.dc_title }}</a>
+        <li><a href="{{ p.id }}/?apikey={{key}}">{{ p.dc_title }}</a> - {{ p.annotations|length }} annotation(s) - media <a href="{{ p.main_media.url }}">{{ p.main_media.meta.dc_title }}</a>
         {% else %}
         <li>No package</li>
         {% endfor %}

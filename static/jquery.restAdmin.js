@@ -501,7 +501,7 @@
           td.append(text);
           row.append(td);
         });
-        var controls = $('<td><a href="#" class="btn btn-mini " data-role="edit"><i class="icon-pencil"></i> Edit</a></td>');
+        var controls = $('<td><a href="#" class="btn btn-mini " data-role="edit"><i class="icon-pencil"></i> Edit</a> | <a href="#" class="btn btn-mini " data-role="delete"><i class="icon delete"></i> Delete</a></td>');
         row.append(controls);
         row.data('id', datum[idColumn]);
         tbody.append(row);
@@ -509,6 +509,28 @@
         controls.find('[data-role="edit"]').click(function() {
           edit(datum);
           return false;
+        });
+        controls.find('[data-role="delete"]').click(function() {
+            if (!options.removeConfirm)
+            {
+                options.removeConfirm = "Are you sure you want to delete this item?";
+            }
+            if (confirm(options.removeConfirm))
+            {
+                options.remove(
+                    datum,
+                    {
+                        'success':  function(datum) {
+                            // We have consistently been burned when we have
+                            // assumed we know exactly how to update the list view
+                            // from the browser side. Think about pagination,
+                            // sort order, and server side cleaning of the data.
+                            // Discover humility. Call refresh. Om.
+                            options.refreshData({ success: list });
+                        }
+                    });
+            }
+            return false;
         });
       });
       if (options.sortable)

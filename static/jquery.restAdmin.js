@@ -182,17 +182,18 @@
     if (!options.update)
     {
       options.update = function(datum, params)
-      {
-        $.ajax(options.url + '/' + datum[idColumn], {
-          type: 'PUT',
-          data: JSON.stringify(datum),
-          dataType: 'json',
-          processData: false,
-          contentType: "application/json",
-          success: params.success,
-          error: params.error
-        });
-      };
+        {
+            var u = options.url.split("?", 1);            
+            $.ajax(u[0] + '/' + datum[idColumn] + (u[1] ? "?" + u[1] : ""), {
+                type: 'PUT',
+                data: JSON.stringify(datum),
+                dataType: 'json',
+                processData: false,
+                contentType: "application/json",
+                success: params.success,
+                error: params.error
+            });
+        };
     }
 
     // GET all items
@@ -214,7 +215,8 @@
     {
       options.remove = function(datum, params)
       {
-        $.ajax(options.url + '/' + datum[idColumn], {
+          var u = options.url.split("?", 1);            
+          $.ajax(u[0] + '/' + datum[idColumn] + (u[1] ? "?" + u[1] : ""), {
           type: 'DELETE',
           dataType: 'json',
           success: params.success,

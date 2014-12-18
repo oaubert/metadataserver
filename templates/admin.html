@@ -256,15 +256,21 @@
             table_init_count = table_init_count + 1;
             console.log(table_init_count);
             if (table_init_count > 3) {
-                $("table").dataTable({
-                    "paginate": true,
-                    "lengthChange": false,
-                    "displayLength": 50,
-                    "filter": true,
-                    "sort": true,
-                    'info': true,
-                    "dom": 'fipt',
-                    "autoWidth": true });
+                $("table").each(function () {
+                    var mod_index = $(this).find("th").map( function (i, c) { return (c.getAttribute("class") || "").indexOf("dc:modified") < 0 ? 0 : 1; }).toArray().indexOf(1);
+                    if (mod_index < 0)
+                        mod_index = 0;
+                    $(this).dataTable({
+                        "paginate": true,
+                        "lengthChange": false,
+                        "displayLength": 50,
+                        "filter": true,
+                        "sort": true,
+                        'info': true,
+                        "order": [ mod_index, 'desc' ],
+                        "dom": 'fipt',
+                        "autoWidth": true });
+                });
                 table_init_count = 0;
             };
         });

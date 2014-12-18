@@ -237,7 +237,7 @@ def imagecache_view(pid, info):
 
 @app.route("/admin/")
 def admin_view():
-    return render_template('admin.html')
+    return render_template('admin.html', filter=request.values.get('filter', ''))
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():

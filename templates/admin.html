@@ -146,7 +146,7 @@
             ]
         });
         $('#annotation-listing').restAdmin({
-            url: '../api/annotation',
+            url: '../api/annotation{% if filter %}?filter={{ filter }}{%endif%}',
             schema: [
                 {
                     name: "id",

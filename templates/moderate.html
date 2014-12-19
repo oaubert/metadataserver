@@ -1,0 +1,105 @@
+<!doctype html>
+<head>
+  <title>Metadata Server - Moderation</title>
+  <link href='../static/metaserver.css' rel='stylesheet' type='text/css'>
+  <link href='../static/jquery.dataTables.css' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.4.1/pure-min.css">
+  <style type="text/css">
+    tr:nth-child(even) { background-color: #CCC !important; }
+  </style>
+</head>
+<body>
+<h1>Annotation listing</h1>
+<div id="annotation-listing"></div>
+
+<script type="text/javascript" src="../static/underscore.js"></script>
+<script type="text/javascript" src="../static/jquery.min.js"></script>
+<script type="text/javascript" src="../static/jquery.restAdmin.js"></script>
+<script type="text/javascript" src="../static/jquery.dataTables.min.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $('#annotation-listing').restAdmin({
+            url: '../api/annotation?apikey={{key}}{% if filter %}&filter={{ filter }}{%endif%}',
+            schema: [
+                {
+                    name: "id",
+                    type: "text",
+                    label: "id",
+                    unique: true,
+                    required: true,
+                    readOnly: true
+                },
+                {
+                    name: "content.description",
+                    type: "text",
+                    label: "Description"
+                },
+                {
+                    name: "content.title",
+                    type: "text",
+                    label: "Title"
+                },
+                {
+                    name: "media",
+                    type: "text",
+                    label: "Media"
+                },
+                {
+                    name: "begin",
+                    type: "text",
+                    label: "Begin"
+                },
+                {
+                    name: "end",
+                    type: "text",
+                    label: "End"
+                },
+                {
+                    name: "type",
+                    type: "text",
+                    label: "Type"
+                },
+                {
+                    name: "meta.dc:creator",
+                    type: "text",
+                    label: "creator"
+                },
+                {
+                    name: "meta.dc:created",
+                    type: "text",
+                    label: "created"
+                },
+                {
+                    name: "meta.dc:contributor",
+                    type: "text",
+                    label: "contributor"
+                },
+                {
+                    name: "meta.dc:modified",
+                    type: "text",
+                    label: "modified"
+                }
+            ]
+        });
+
+        $(document).on('jraRefreshedList', function () {
+            $("table[role!=grid]").each(function () {
+                var mod_index = $(this).find("th").map( function (i, c) { return (c.getAttribute("class") || "").indexOf("dc:modified") < 0 ? 0 : 1; }).toArray().indexOf(1);
+                if (mod_index < 0)
+                    mod_index = 0;
+                $(this).dataTable({
+                    "paginate": true,
+                    "lengthChange": false,
+                    "displayLength": 50,
+                    "filter": true,
+                    "sort": true,
+                    'info': true,
+                    "order": [ mod_index, 'desc' ],
+                    "dom": 'fipt',
+                    "autoWidth": true });
+            });
+        });
+    });
+</script>
+
+</body>

@@ -277,6 +277,13 @@ def admin_view():
         return make_response("Invalid API key", 403)
     return render_template('admin.html', filter=request.values.get('filter', ''), key=key)
 
+@app.route("/moderate/")
+def moderate_view():
+    key = request.values.get('apikey') or DEFAULT_KEY
+    if not check_capability(key, [ "GETmoderate" ]):
+        return make_response("Invalid API key", 403)
+    return render_template('moderate.html', filter=request.values.get('filter', ''), key=key)
+
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     # 'userinfo' is either a (GET) named param, or a (POST) form

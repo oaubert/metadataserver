@@ -280,7 +280,7 @@ def admin_view():
 @app.route("/moderate/")
 def moderate_view():
     key = request.values.get('apikey') or DEFAULT_KEY
-    if not check_capability(key, [ "GETmoderate" ]):
+    if not check_capability(key, [ "GETmoderate", "GETadmin" ]):
         return make_response("Invalid API key", 403)
     return render_template('moderate.html', filter=request.values.get('filter', ''), key=key)
 

@@ -289,6 +289,7 @@
                     "dom": 'fipt',
                     "autoWidth": true });
             });
+            $("td.media").html( function () { return '<a href="' + document.location.toString() + '&filter=media:' + $(this).text() + '">' + $(this).text() + '</a>' });
         });
     });
 

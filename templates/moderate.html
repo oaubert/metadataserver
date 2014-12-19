@@ -9,8 +9,24 @@
   </style>
 </head>
 <body>
-<h1>Annotation listing</h1>
-<div id="annotation-listing"></div>
+  <h1>Medias</h1>
+  <table id="mediainfo">
+    <thead>
+      <tr><th>Media</th><th>Annotations</th><th>Last contrib.</th></tr>
+    </thead>
+    <tbody>
+    {% for r in mediainfo %}
+    <tr>
+      <td><a href="?apikey={{key}}&filter=media:{{ r.0 }}">{{r.0}}</a></td>
+      <td>{{ r.1 }}</td>
+      <td>{{ r.2 }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <h1>Annotation listing</h1>
+  <div id="annotation-listing"></div>
 
 <script type="text/javascript" src="../static/underscore.js"></script>
 <script type="text/javascript" src="../static/jquery.min.js"></script>
@@ -18,6 +34,17 @@
 <script type="text/javascript" src="../static/jquery.dataTables.min.js"></script>
 <script type="text/javascript">
     $(function() {
+        $('#mediainfo').dataTable({
+                    "paginate": true,
+                    "lengthChange": false,
+                    "displayLength": 5,
+                    "filter": true,
+                    "sort": true,
+                    'info': true,
+                    "order": [ 1, 'desc' ],
+                    "dom": 'fipt',
+                    "autoWidth": true });
+
         $('#annotation-listing').restAdmin({
             url: '../api/annotation?apikey={{key}}{% if filter %}&filter={{ filter }}{%endif%}',
             schema: [

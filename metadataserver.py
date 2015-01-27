@@ -542,7 +542,10 @@ def package_list():
         # Mapping table for converted ids
         mapping = {}
         for m in data.get('medias', []):
-            db['medias'].save(clean_json(m, mapping))
+            l = db['medias'].find({'id': m['id']})
+            if l.count() == 0:
+                # Not already existing media
+                db['medias'].save(clean_json(m, mapping))
         for at in data.get('annotation-types', []):
             db['annotationtypes'].save(clean_json(at, mapping))
         for a in data.get('annotations', []):
@@ -561,7 +564,9 @@ def package_list():
         fix_ids(p)
         # FIXME: there should be some way to specify associated media/annotationtypes/annotations.
         # Maybe store in meta some info containings ids?
-        db['packages'].save(p)
+        l = db['packages'].find_one({'id': p['id']})
+        if not l:
+            db['packages'].save(p)
         return jsonify(id=p['id'])
     else:
         querymap = { 'user': 'meta.dc:contributor',

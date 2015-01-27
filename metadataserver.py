@@ -147,10 +147,10 @@ def clean_json(data, mapping=None):
             meta[n.replace('.', '_')] = meta[n]
             del meta[n]
     # Convert mapped ids (for annotations)
-    newidref = mapping.get(meta.get('id-ref'))
+    newidref = mapping.get(meta.get('id-ref'), meta.get('id-ref'))
     if newidref is not None:
         meta['id-ref'] = newidref
-    newmedia = mapping.get(data.get('media'))
+    newmedia = mapping.get(data.get('media'), data.get('media'))
     if newmedia:
         data['media'] = newmedia
 

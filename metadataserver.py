@@ -547,7 +547,13 @@ def package_list():
                 # Not already existing media
                 db['medias'].save(clean_json(m, mapping))
         for at in data.get('annotation-types', []):
-            db['annotationtypes'].save(clean_json(at, mapping))
+            l = db['annotationtypes'].find({'dc:title': at['dc:title']})
+            if l.count() == 0:
+                # Not already existing type
+                db['annotationtypes'].save(clean_json(at, mapping))
+            else:
+                # Remap with existing annotationtype id
+                mapping[at['id']] = l[0]['id']
         for a in data.get('annotations', []):
             db['annotations'].save(clean_json(a, mapping))
 

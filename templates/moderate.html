@@ -50,7 +50,7 @@
             schema: [
                 {
                     name: "id",
-                    type: "text",
+                    type: "key",
                     label: "id",
                     unique: true,
                     required: true,
@@ -126,7 +126,6 @@
                     "autoWidth": true });
             });
             $("td.media").html( function () { return '<a href="' + document.location.toString() + '&filter=media:' + $(this).text() + '">' + $(this).text() + '</a>' });
-            $("td.id").html( function () { return '<a href="' + document.location.pathname + '../api/annotation/' + $(this).text() + '">' + $(this).text() + '</a>' });
         });
     });
 </script>

@@ -125,7 +125,8 @@
                     "dom": 'fipt',
                     "autoWidth": true });
             });
-            $("td.media").html( function () { return '<a href="' + document.location.toString() + '&filter=media:' + $(this).text() + '">' + $(this).text() + '</a>' })            
+            $("td.media").html( function () { return '<a href="' + document.location.toString() + '&filter=media:' + $(this).text() + '">' + $(this).text() + '</a>' });
+            $("td.id").html( function () { return '<a href="' + document.location.pathname + '../api/annotation/' + $(this).text() + '">' + $(this).text() + '</a>' });
         });
     });
 </script>

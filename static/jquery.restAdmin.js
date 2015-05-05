@@ -267,6 +267,23 @@
       defaultValue: ''
     });
 
+    if (!options.types.key)
+    {
+      options.types.key = {};
+    }
+
+    _.defaults(options.types.key, {
+      listText: function(column, val) {
+        return $('<a href="' + options.url.split("?", 2)[0] + '/' + val + '">' + val + '</a>');
+      },
+      control: function(column, val) {
+        var e = $('<input class="pure-input-2-3" type="text" data-role="control" />');
+        e.val(val);
+        return e;
+      },
+      defaultValue: ''
+    });
+      
     if (!options.types.textarea)
     {
       options.types.textarea = {};

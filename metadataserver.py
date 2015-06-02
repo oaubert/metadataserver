@@ -25,6 +25,7 @@ MetaDataPlayer component from IRI.
 It stores the annotation information in a mongo database.
 """
 
+import sys
 import os
 import json
 import bson
@@ -638,11 +639,18 @@ if __name__ == "__main__":
                       help="Enable cross site requests.", default=False)
     parser.add_option("-p", "--port", dest="port", type="int", action="store",
                       help="Port number", default=5001)
+    parser.add_option("-K", "--admin-api-key", dest="admin_key", action="store", help="Store an admin API key", default=None)
 
     (options, args) = parser.parse_args()
     CONFIG.update(vars(options))
 
     db = connection[CONFIG['database']]
+
+    if options.admin_key:
+        db['apikeys'].insert({ 'key': options.admin_key,
+                               'capabilities': "GETadmin,POSTadmin,GETelements,GETelement,PUTelement,POSTelements,DELETEelement,POSTelement,GETunfilteredelements,GETkeys,GETkey,PUTkey,DELETEkey,POSTkeys".split(',') })
+        print "Key %s added as admin key. You can restart the server." % options.admin_key
+        sys.exit(0)
     load_keys()
 
     if args and args[0] == 'shell':

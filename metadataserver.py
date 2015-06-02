@@ -51,7 +51,7 @@ CONFIG = {
     'port': 5001,
 }
 
-connection = pymongo.Connection("localhost", 27017)
+connection = pymongo.MongoClient("localhost", 27017)
 db = connection[DB]
 
 app = Flask(__name__)

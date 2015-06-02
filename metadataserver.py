@@ -38,13 +38,11 @@ from functools import wraps
 import pymongo
 
 # PARAMETERS
-# DB = DataBase
-DB   	  = 'mds'
-
 API_PREFIX = '/api/'
 
 # Server configuration
 CONFIG = {
+    'database': 'mds',
     # Enable debug.
     'enable_debug': False,
     'enable_cross_site_requests': False,
@@ -52,7 +50,6 @@ CONFIG = {
 }
 
 connection = pymongo.MongoClient("localhost", 27017)
-db = connection[DB]
 
 app = Flask(__name__)
 
@@ -619,7 +616,7 @@ def package_get(pid):
     #    else:
     #        print "Error: missing annotation type"
     data = json.dumps(p, indent=None if request.is_xhr else 2, cls=MongoEncoder)
-    mimetype = 'application/json'    
+    mimetype = 'application/json'
     callback = request.args.get('callback', False)
     if callback:
         data = str(callback) + '(' + data + ')'
@@ -630,8 +627,11 @@ def package_get(pid):
 app.secret_key = os.urandom(24)
 
 if __name__ == "__main__":
-    parser=OptionParser(usage="""Trace server.\n%prog [options]""")
+    global db
 
+    parser = OptionParser(usage="""Trace server.\n%prog [options]""")
+
+    parser.add_option("-D", "--database", dest="database", action="store", default="mds")
     parser.add_option("-d", "--debug", dest="enable_debug", action="store_true",
                       help="Enable debug mode.", default=False)
     parser.add_option("-x", "--cross-site-requests", dest="enable_cross_site_requests", action="store_true",
@@ -642,6 +642,7 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
     CONFIG.update(vars(options))
 
+    db = connection[CONFIG['database']]
     load_keys()
 
     if args and args[0] == 'shell':

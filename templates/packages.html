@@ -4,14 +4,18 @@
         <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <link href='../static/metaserver.css' rel='stylesheet' type='text/css'>
+        <link href='../static/jquery.dataTables.css' rel='stylesheet' type='text/css'>
         <title>Available packages</title>
+        <script type="text/javascript" src="../static/jquery.min.js"></script>
+        <script type="text/javascript" src="../static/jquery.restAdmin.js"></script>
+        <script type="text/javascript" src="../static/jquery.dataTables.min.js"></script>
     </head>
 
     <body>
       <header>
       <nav>
         <ul>
-          <li><a href="../">Index</a></li>
+          <li><a href="../?apikey={{key}}">Index</a></li>
           <li><a href="../package/?apikey={{key}}">Packages</a></li>
           <li><a href="../admin/?apikey={{key}}">Admin</a></li>
         </ul>
@@ -19,12 +23,35 @@
       </header>
 
       <h1>Available packages</h1>
-      <ul>
+      <table id="packageTable">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Annotations count</th>
+            <th>Media</th>
+          </tr>
+        </thead>
+        <tbody>
         {% for p in packages %}
-        <li><a href="{{ p.id }}/?apikey={{key}}">{{ p.dc_title }}</a> - {{ p.annotations|length }} annotation(s) - media <a href="{{ p.main_media.url }}">{{ p.main_media.meta.dc_title }}</a>
-        {% else %}
-        <li>No package</li>
+        <tr>
+          <td><a href="{{ p.id }}/?apikey={{key}}">{{ p.dc_title }}</a></td>
+          <td>{{ p.annotations|length }}</td>
+          <td><a href="{{ p.main_media.url }}">{{ p.main_media.meta.dc_title }}</a></td>
+        </tr>
         {% endfor %}
-      </ul>
+        </tbody>
+      </table>
+      <script type="text/javascript">
+        $("#packageTable").dataTable({
+            "paginate": true,
+            "lengthChange": false,
+            "displayLength": 50,
+            "filter": true,
+            "sort": true,
+            'info': true,
+            "order": [ 0, 'desc' ],
+            "dom": 'fipt',
+            "autoWidth": true });
+      </script>
     </body>
 </html>

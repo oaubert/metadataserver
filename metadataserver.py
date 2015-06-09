@@ -110,7 +110,7 @@ def check_capability(key, actions):
     ['GETadmin', 'GETelements', 'GETelement', 'PUTelement', 'DELETEelement', 'POSTelements', 'POSTelement', 'GETunfilteredelements', 'GETkeys', 'POSTkeys', 'GETkey', 'PUTkey', 'DELETEkey' ]
     """
     if CONFIG.get('enable_debug'):
-        app.logger.debug("Check %s : %s <-> %s", key, unicode(actions), unicode(APIKEYS.get(key)))
+        app.logger.debug("Check %s : %s <-> %s", request.path, unicode(actions), unicode(APIKEYS.get(key)))
     return set(actions).intersection(APIKEYS.get(key, []))
 
 class MongoEncoder(json.JSONEncoder):

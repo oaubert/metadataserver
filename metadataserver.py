@@ -69,12 +69,18 @@ def get_api_key():
 def handle_invalid_access(error):
     return make_response("Invalid API key", 403)
 
-def check_access(elements=[]):
+def check_access(elements=[], use_collection=False, use_stripped_collection=False):
     """Decorator that checks access rights.
     """
     def _wrapper(original_function):
         def _checker(*args, **kwargs):
-            if not check_capability(get_api_key(), [ "%s%s" % (request.method, el) for el in elements ]):
+            if use_collection and 'collection' in kwargs:
+                els = [ kwargs.get('collection') ] + list(elements)
+            elif use_stripped_collection and 'collection' in kwargs:
+                els = [ kwargs.get('collection', '').rstrip('s') ] + list(elements)
+            else:
+                els = elements
+            if not check_capability(get_api_key(), [ "%s%s" % (request.method, el) for el in els ]):
                 raise InvalidAccess()
             return original_function(*args, **kwargs)
         return wraps(original_function)(_checker)
@@ -359,13 +365,13 @@ SPECIFIC_QUERYMAPS = {
 @app.route(API_PREFIX + 'media', methods= [ 'GET', 'POST' ], defaults={'collection': 'medias'})
 @app.route(API_PREFIX + 'userinfo', methods= [ 'GET', 'POST' ], defaults={'collection': 'userinfo'})
 @app.route(API_PREFIX + 'meta', methods= [ 'GET', 'POST' ], defaults={'collection': 'packages'})
+@check_access(('elements', ), use_collection=True)
 def element_list(collection):
     """Generic element listing method.
 
     It handles GET and POST requests on element collections.
     """
     # TODO: find a way to pass collection parameter to check_access
-    key = get_api_key()
     if request.method == 'HEAD' or request.method == 'OPTIONS':
         if CONFIG['enable_cross_site_requests']:
             return Response('', 200, {
@@ -377,8 +383,6 @@ def element_list(collection):
             return Response('', 200);
 
     if request.method == 'POST':
-        if not check_capability(key, [ "POST%s" % el for el in ('elements', collection)]):
-            raise InvalidAccess()
         # FIXME: do some sanity checks here (valid properties, existing ids...)
         # Insert a new element
         data = request.json
@@ -395,13 +399,13 @@ def element_list(collection):
             response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return response
     else:
-        if not check_capability(key, [ "GET%s" % el for el in ('elements', collection) ]):
-            raise InvalidAccess()
         querymap = { 'user': 'meta.dc:contributor',
                      'creator': 'meta.dc:creator' }
         querymap.update(SPECIFIC_QUERYMAPS[collection])
-        if not request.values.getlist('filter') and not check_capability(key, [ "GETunfiltered%s" % el for el in ('elements', collection) ]):
-            return make_response("Too generic query.", 403)
+        if (not request.values.getlist('filter')
+            and not check_capability(get_api_key(),
+                                     [ "GETunfiltered%s" % el for el in ('elements', collection) ])):
+            raise InvalidAccess("Query too generic.")
 
         query = dict( (querymap.get(name, name), value)
                       for (name, value) in ( f.split(':') for f in request.values.getlist('filter') )
@@ -423,15 +427,13 @@ def element_list(collection):
 @app.route(API_PREFIX + 'media/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'medias'})
 @app.route(API_PREFIX + 'userinfo/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'userinfo'})
 @app.route(API_PREFIX + 'meta/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'packages'})
+@check_access(('elements', ), use_stripped_collection=True)
 def element_get(eid, collection):
     """Generic element access.
 
     It handles GET/PUT/DELETE requests on element instances.
     Note that /package/ is handled on its own, since we regenerate data by aggregating different elements.
     """
-    key = get_api_key()
-    if not check_capability(key, [ "%s%s" % (request.method, el) for el in ('element', collection.rstrip("s"))]):
-        raise InvalidAccess()
     el = db[collection].find_one({ 'id': eid })
     if el is None:
         abort(404)

@@ -301,7 +301,13 @@ def admin_view():
 @check_access(('moderate', 'admin'))
 def moderate_view():
     mediainfo = [ (r['_id'], r['annotations'], r['lastmod'])
-                  for r in db.annotations.aggregate( { '$group': { '_id': '$media', 'annotations': { '$sum': 1 }, 'lastmod': { '$max': '$meta.dc:modified'} }} )['result'] ]
+                  for r in db.annotations.aggregate([
+                          { '$group': {
+                              '_id': '$media',
+                              'annotations': { '$sum': 1 },
+                              'lastmod': { '$max': '$meta.dc:modified'}
+                          }
+                        }]) ]
     return render_template('moderate.html', filter=request.values.get('filter', ''), mediainfo=mediainfo, key=get_api_key())
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -468,7 +474,7 @@ def user_list():
         else:
             field = '$dc:contributor'
         aggr = db[collection].aggregate( [ { '$group': { '_id': field, 'count': { '$sum': 1 } } } ] )
-        for res in aggr['result']:
+        for res in aggr:
             users.setdefault(res['_id'], {})[collection] = res['count']
     return current_app.response_class( json.dumps(users,
                                        indent=None if request.is_xhr else 2,

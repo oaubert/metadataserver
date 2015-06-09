@@ -273,8 +273,9 @@
     }
 
     _.defaults(options.types.key, {
-      listText: function(column, val) {
-        return $('<a href="' + options.url.split("?", 2)[0] + '/' + val + '">' + val + '</a>');
+        listText: function(column, val) {
+            var urldata = options.url.split("?", 2);
+        return $('<a href="' + urldata[0] + '/' + val + '?' + urldata[1] + '">' + val + '</a>');
       },
       control: function(column, val) {
         var e = $('<input class="pure-input-2-3" type="text" data-role="control" />');

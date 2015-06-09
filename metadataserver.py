@@ -80,7 +80,8 @@ def check_capability(key, actions):
     Admin rights correspond to:
     ['GETadmin', 'GETelements', 'GETelement', 'PUTelement', 'DELETEelement', 'POSTelements', 'POSTelement', 'GETunfilteredelements', 'GETkeys', 'POSTkeys', 'GETkey', 'PUTkey', 'DELETEkey' ]
     """
-    print "Check", key, ":", actions, " <-> ", APIKEYS.get(key)
+    if CONFIG.get('enable_debug'):
+        app.logger.debug("Check %s : %s <-> %s", key, unicode(actions), unicode(APIKEYS.get(key)))
     return set(actions).intersection(APIKEYS.get(key, []))
 
 class MongoEncoder(json.JSONEncoder):
@@ -313,7 +314,8 @@ def login():
                        'end': t,
                        'subject': session['userinfo'].get('default_subject', "anonymous")
                        })
-    #app.logger.debug("Logged in as " + session['userinfo']['id'])
+    if CONFIG.get('enable_debug'):
+        app.logger.debug("Logged in as " + session['userinfo']['id'])
     return redirect(url_for('index'))
 
 @app.route('/logout')

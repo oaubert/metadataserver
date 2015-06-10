@@ -32,6 +32,7 @@ import bson
 import uuid
 import time
 import datetime
+import jsonschema
 from optparse import OptionParser
 from flask import Flask, Response, render_template, make_response
 from flask import session, request, redirect, url_for, current_app, abort, jsonify
@@ -56,6 +57,21 @@ app = Flask(__name__)
 
 DEFAULT_KEY = 'default'
 APIKEYS = {}
+
+# List of validating schemas
+SCHEMAS = {
+    'analytics': {
+        "type" : "object",
+        "properties" : {
+            #         # date, username, user-uuid, object-url, property, value (literal)
+            "date" : { "type": "string" }, # should be date-time
+            "username" : { "type" : "string" },
+            "useruuid" : { "type" : "string" },
+            "subject": { "type": "string" },
+            "property": { "type": "string" },
+            "value": [ "string", "number" ] },
+    },
+}
 
 class InvalidAccess(Exception):
     pass
@@ -534,6 +550,45 @@ def key_get(k):
     # GET
     return current_app.response_class(json.dumps(el, indent=None if request.is_xhr else 2, cls=MongoEncoder),
                                       mimetype='application/json')
+
+@app.route(API_PREFIX + 'analytics/', methods= [ 'GET', 'POST' ])
+@check_access(('admin', 'analytics'))
+def analytics_list():
+    """Enumerate analytics objects
+    """
+    if request.method == 'POST':
+        # Create a new key
+        data = json.loads(request.data)
+        data['date'] = datetime.datetime.now().isoformat()
+        # Check data structure, using jsonschema
+        try:
+            jsonschema.validate(data, SCHEMAS['analytics'])
+        except jsonschema.ValidationError:
+            # Unprocessable entity
+            abort(422)
+        # date, username, useruuid, subject, property, value
+        db['analytics'].insert(data)
+        return current_app.response_class( json.dumps(data,
+                                                      indent=None if request.is_xhr else 2,
+                                                      cls=MongoEncoder),
+                                        mimetype='application/json')
+    else:
+        # FIXME: handle query parameters (username/suject/property)
+        return current_app.response_class( json.dumps(list(db['analytics'].find()),
+                                                      indent=None if request.is_xhr else 2,
+                                                      cls=MongoEncoder),
+                                           mimetype='application/json')
+
+@app.route(API_PREFIX + 'analytics/<string:key>', methods= [ 'GET' ])
+@check_access(('admin', 'analytics'))
+def analytics_get(key):
+    """Analytics access
+
+    It handles GET on analytics data
+    """
+    return current_app.response_class(json.dumps(list(db['analytics'].find({'subject': key})),
+                                                 indent=None if request.is_xhr else 2, cls=MongoEncoder),
+                                    mimetype='application/json')
 
 @app.route(API_PREFIX + 'user/<string:uid>/annotation', methods= [ 'GET' ])
 @check_access(('elements', 'userannotations'))

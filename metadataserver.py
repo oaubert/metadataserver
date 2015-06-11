@@ -69,7 +69,12 @@ SCHEMAS = {
             "useruuid" : { "type" : "string" },
             "subject": { "type": "string" },
             "property": { "type": "string" },
-            "value": [ "string", "number" ] },
+            "value": { "anyOf": [
+                {"type": "string", "maxLength": 255},
+                {"type": "integer" }
+            ]
+            }
+        },
     },
 }
 
@@ -563,9 +568,9 @@ def analytics_list():
         # Check data structure, using jsonschema
         try:
             jsonschema.validate(data, SCHEMAS['analytics'])
-        except jsonschema.ValidationError:
+        except (jsonschema.ValidationError, jsonschema.SchemaError), e:
             # Unprocessable entity
-            abort(422)
+            abort(422, e.message)
         # date, username, useruuid, subject, property, value
         db['analytics'].insert(data)
         return current_app.response_class( json.dumps(data,

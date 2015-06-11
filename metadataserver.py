@@ -631,9 +631,14 @@ def package_list():
         p = data['meta']
 
         # Interim hack for malformed data
-        if p['main_media']['id-ref'] == 'package1':
-            p['main_media']['id-ref'] = data['medias'][0]['id']
+        if isinstance(p['main_media'], basestring):
+            # Malformed data. Replace by a dict.
+            p['main_media'] = { 'id-ref': p['main_media'] }
 
+        if not p.get('main_media') or p['main_media'].get('id-ref') == 'package1':
+            # Use first media if no valid media was specified
+            p['main_media']['id-ref'] = { 'id-ref': data['medias'][0]['id'] }
+            
         newmediaref = mapping.get(p['main_media'].get('id-ref'))
         if newmediaref is not None:
             p['main_media']['id-ref'] = newmediaref

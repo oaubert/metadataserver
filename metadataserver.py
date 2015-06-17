@@ -36,7 +36,7 @@ import jsonschema
 from optparse import OptionParser
 from flask import Flask, Response, render_template, make_response
 from flask import session, request, redirect, url_for, current_app, abort, jsonify
-from functools import wraps
+from functools import wraps, update_wrapper
 import pymongo
 
 # PARAMETERS
@@ -106,6 +106,50 @@ def check_access(elements=[], use_collection=False, use_stripped_collection=Fals
             return original_function(*args, **kwargs)
         return wraps(original_function)(_checker)
     return _wrapper
+
+# Snippet from http://flask.pocoo.org/snippets/56/
+def crossdomain(origin=None, methods=None, headers=None,
+                max_age=21600, attach_to_all=True,
+                automatic_options=True):
+    if methods is not None:
+        methods = ', '.join(sorted(x.upper() for x in methods))
+    if headers is not None and not isinstance(headers, basestring):
+        headers = ', '.join(x.upper() for x in headers)
+    if not isinstance(origin, basestring):
+        origin = ', '.join(origin)
+    if isinstance(max_age, datetime.timedelta):
+        max_age = max_age.total_seconds()
+
+    def get_methods():
+        if methods is not None:
+            return methods
+
+        options_resp = current_app.make_default_options_response()
+        return options_resp.headers['allow']
+
+    def decorator(f):
+        def wrapped_function(*args, **kwargs):
+            if automatic_options and request.method == 'OPTIONS':
+                resp = current_app.make_default_options_response()
+            else:
+                resp = make_response(f(*args, **kwargs))
+            if not attach_to_all and request.method != 'OPTIONS':
+                return resp
+            if not CONFIG['enable_cross_site_requests']:
+                return resp
+
+            h = resp.headers
+
+            h['Access-Control-Allow-Origin'] = origin
+            h['Access-Control-Allow-Methods'] = get_methods()
+            h['Access-Control-Max-Age'] = str(max_age)
+            if headers is not None:
+                h['Access-Control-Allow-Headers'] = headers
+            return resp
+
+        f.provide_automatic_options = False
+        return update_wrapper(wrapped_function, f)
+    return decorator
 
 def load_keys():
     """Load API key data.
@@ -269,15 +313,10 @@ def custom_401(error):
     return Response('Unauthorized access', 401, {'WWWAuthenticate':'Basic realm="Login Required"'})
 
 @app.route("/", methods= [ 'GET', 'HEAD', 'OPTIONS' ])
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ])
 def index():
     if request.method == 'HEAD' or request.method == 'OPTIONS':
-        if CONFIG['enable_cross_site_requests']:
-            return Response('', 200, {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'POST, GET, OPTIONS'
-            })
-        else:
-            return Response('', 200);
+        return Response('', 200);
 
     if not 'userinfo' in session:
         # Autologin
@@ -288,6 +327,7 @@ def index():
 
 @app.route("/package/")
 @check_access(('elements', 'packages'))
+@crossdomain(origin='*', methods= [ 'GET', 'HEAD', 'OPTIONS' ])
 def packages_view():
     packages = list(db['packages'].find())
     for p in packages:
@@ -302,6 +342,7 @@ def packages_view():
 
 @app.route("/package/<string:pid>/")
 @check_access(('element', 'package'))
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ])
 def package_view(pid):
     package = db['packages'].find_one({ 'id': pid })
     if package is None:
@@ -332,6 +373,7 @@ def moderate_view():
     return render_template('moderate.html', filter=request.values.get('filter', ''), mediainfo=mediainfo, key=get_api_key())
 
 @app.route('/login', methods = ['GET', 'POST'])
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ])
 def login():
     # 'userinfo' is either a (GET) named param, or a (POST) form
     # field, whose value contains JSON data with information about
@@ -393,6 +435,7 @@ SPECIFIC_QUERYMAPS = {
 @app.route(API_PREFIX + 'userinfo', methods= [ 'GET', 'POST' ], defaults={'collection': 'userinfo'})
 @app.route(API_PREFIX + 'meta', methods= [ 'GET', 'POST' ], defaults={'collection': 'packages'})
 @check_access(('elements', ), use_collection=True)
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ])
 def element_list(collection):
     """Generic element listing method.
 
@@ -455,6 +498,7 @@ def element_list(collection):
 @app.route(API_PREFIX + 'userinfo/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'userinfo'})
 @app.route(API_PREFIX + 'meta/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'packages'})
 @check_access(('elements', ), use_stripped_collection=True)
+@crossdomain(origin='*', methods= [ 'GET', 'PUT', 'DELETE', 'OPTIONS' ])
 def element_get(eid, collection):
     """Generic element access.
 
@@ -558,6 +602,7 @@ def key_get(k):
 
 @app.route(API_PREFIX + 'analytics/', methods= [ 'GET', 'POST' ])
 @check_access(('admin', 'analytics'))
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ])
 def analytics_list():
     """Enumerate analytics objects
     """
@@ -586,6 +631,7 @@ def analytics_list():
 
 @app.route(API_PREFIX + 'analytics/<string:key>', methods= [ 'GET' ])
 @check_access(('admin', 'analytics'))
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ])
 def analytics_get(key):
     """Analytics access
 
@@ -605,6 +651,7 @@ def user_annotation_list(uid):
 
 @app.route(API_PREFIX + 'package/', methods= [ 'GET', 'POST' ])
 @check_access(('elements', 'packages'))
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ])
 def package_list():
     if request.method == 'POST':
         # Insert a new package

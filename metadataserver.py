@@ -602,7 +602,7 @@ def key_get(k):
 
 @app.route(API_PREFIX + 'analytics/', methods= [ 'GET', 'POST', 'OPTIONS' ])
 @check_access(('admin', 'analytics'))
-@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ])
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ], headers='*')
 def analytics_list():
     """Enumerate analytics objects
     """
@@ -631,7 +631,7 @@ def analytics_list():
 
 @app.route(API_PREFIX + 'analytics/<string:key>', methods= [ 'GET' ])
 @check_access(('admin', 'analytics'))
-@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ])
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ], headers='*')
 def analytics_get(key):
     """Analytics access
 

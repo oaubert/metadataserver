@@ -58,6 +58,9 @@ app = Flask(__name__)
 DEFAULT_KEY = 'default'
 APIKEYS = {}
 
+CORS_HEADERS = [ "origin",
+                 "content-type",
+                 "accept" ]
 # List of validating schemas
 SCHEMAS = {
     'analytics': {
@@ -602,7 +605,7 @@ def key_get(k):
 
 @app.route(API_PREFIX + 'analytics/', methods= [ 'GET', 'POST', 'OPTIONS' ])
 @check_access(('admin', 'analytics'))
-@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ], headers='*')
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ], headers=CORS_HEADERS)
 def analytics_list():
     """Enumerate analytics objects
     """
@@ -631,7 +634,7 @@ def analytics_list():
 
 @app.route(API_PREFIX + 'analytics/<string:key>', methods= [ 'GET' ])
 @check_access(('admin', 'analytics'))
-@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ], headers='*')
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ], headers=CORS_HEADERS)
 def analytics_get(key):
     """Analytics access
 

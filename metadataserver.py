@@ -600,7 +600,7 @@ def key_get(k):
     return current_app.response_class(json.dumps(el, indent=None if request.is_xhr else 2, cls=MongoEncoder),
                                       mimetype='application/json')
 
-@app.route(API_PREFIX + 'analytics/', methods= [ 'GET', 'POST' ])
+@app.route(API_PREFIX + 'analytics/', methods= [ 'GET', 'POST', 'OPTIONS' ])
 @check_access(('admin', 'analytics'))
 @crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ])
 def analytics_list():

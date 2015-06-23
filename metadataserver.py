@@ -438,7 +438,7 @@ SPECIFIC_QUERYMAPS = {
 @app.route(API_PREFIX + 'userinfo', methods= [ 'GET', 'POST' ], defaults={'collection': 'userinfo'})
 @app.route(API_PREFIX + 'meta', methods= [ 'GET', 'POST' ], defaults={'collection': 'packages'})
 @check_access(('elements', ), use_collection=True)
-@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ])
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ], headers=CORS_HEADERS)
 def element_list(collection):
     """Generic element listing method.
 
@@ -501,7 +501,7 @@ def element_list(collection):
 @app.route(API_PREFIX + 'userinfo/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'userinfo'})
 @app.route(API_PREFIX + 'meta/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'packages'})
 @check_access(('elements', ), use_stripped_collection=True)
-@crossdomain(origin='*', methods= [ 'GET', 'PUT', 'DELETE', 'OPTIONS' ])
+@crossdomain(origin='*', methods= [ 'GET', 'PUT', 'DELETE', 'OPTIONS' ], headers=CORS_HEADERS)
 def element_get(eid, collection):
     """Generic element access.
 

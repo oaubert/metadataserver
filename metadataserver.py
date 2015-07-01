@@ -32,12 +32,14 @@ import bson
 import uuid
 import time
 import datetime
-import jsonschema
+from functools import wraps, update_wrapper
 from optparse import OptionParser
+
+import jsonschema
+import pymongo
+
 from flask import Flask, Response, render_template, make_response
 from flask import session, request, redirect, url_for, current_app, abort, jsonify
-from functools import wraps, update_wrapper
-import pymongo
 
 # PARAMETERS
 API_PREFIX = '/api/'
@@ -740,7 +742,7 @@ def package_get(pid):
     #    if at is not None:
     #        p['annotation-types'].append(restore_json(at))
     #    else:
-    #        print "Error: missing annotation type"
+    #        app.logger.info("Error: missing annotation type", atid)
     data = json.dumps(p, indent=None if request.is_xhr else 2, cls=MongoEncoder)
     mimetype = 'application/json'
     callback = request.args.get('callback', False)

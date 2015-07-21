@@ -502,7 +502,7 @@ def element_list(collection):
 @app.route(API_PREFIX + 'media/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'medias'})
 @app.route(API_PREFIX + 'userinfo/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'userinfo'})
 @app.route(API_PREFIX + 'meta/<string:eid>', methods= [ 'GET', 'PUT', 'DELETE' ], defaults={'collection': 'packages'})
-@check_access(('elements', ), use_stripped_collection=True)
+@check_access(('element', ), use_stripped_collection=True)
 @crossdomain(origin='*', methods= [ 'GET', 'PUT', 'DELETE', 'OPTIONS' ], headers=CORS_HEADERS)
 def element_get(eid, collection):
     """Generic element access.

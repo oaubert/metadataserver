@@ -656,7 +656,7 @@ def user_annotation_list(uid):
 
 @app.route(API_PREFIX + 'package/', methods= [ 'GET', 'POST' ])
 @check_access(('elements', 'packages'))
-@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ])
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ], headers=CORS_HEADERS)
 def package_list():
     if request.method == 'POST':
         # Insert a new package

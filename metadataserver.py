@@ -81,6 +81,17 @@ SCHEMAS = {
             }
         },
     },
+    'key': {
+        "type" : "object",
+        "properties" : {
+            "key" : { "type": "string" },
+            "capabilities" : { "type": "array",
+                               "items": {
+                                   "type": "string"
+                               }
+            }
+        }
+    },
 }
 
 class InvalidAccess(Exception):
@@ -568,8 +579,14 @@ def key_list():
         # Create a new key
         data = json.loads(request.data)
         if data.get('key') and data.get('capabilities'):
-            db['apikeys'].insert({ 'key': data.get('key'),
-                                   'capabilities': data.get('capabilities').split(',') })
+            caps = data.get('capabilities')
+            # Let's handle both restAdmin serialization and raw edition
+            if isinstance(caps, basestring):
+                caps = caps.split(",")
+            data = { 'key': data.get('key'),
+                     'capabilities': caps }
+            validate_schema(data, 'key')
+            db['apikeys'].insert(data)
             load_keys()
             return current_app.response_class( json.dumps(data,
                                                indent=None if request.is_xhr else 2,
@@ -603,8 +620,11 @@ def key_get(k):
             data = json.loads(request.data)
             if data['key'] != el['key']:
                 abort(500)
+            validate_schema(data, 'key')
             data['_id'] = el['_id']
-            data['capabilities'] = data['capabilities'].split(',')
+            # Let's handle both restAdmin serialization and raw edition
+            if isinstance(data['capabilities'], basestring):
+                data['capabilities'] = data['capabilities'].split(',')
             db['apikeys'].save(data)
             load_keys()
             return make_response("Resource updated.", 201)

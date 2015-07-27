@@ -166,21 +166,22 @@
     {
       options.create = function(datum, params)
       {
-          var u = options.url.split("?", 2);
-          $.ajax(options.url, {
+        var u = options.url.split("?", 2);
+        $.ajax(options.url, {
           type: 'POST',
           data: JSON.stringify(datum),
           dataType: 'json',
           processData: false,
           contentType: "application/json",
-            success: function (data) {
-              params.success(data);
-              $.notify("Element created", "success");
-            },
-            error: function (m) {
-              $.notify("Cannot create element: " + m.statusText, "error");
-              params.error && params.error();
-            }
+          headers: options.ajaxheaders,
+          success: function (data) {
+            params.success(data);
+            $.notify("Element created", "success");
+          },
+          error: function (m) {
+            $.notify("Cannot create element: " + m.statusText, "error");
+            params.error && params.error();
+          }
         });
       };
     }
@@ -197,6 +198,7 @@
                 dataType: 'json',
                 processData: false,
                 contentType: "application/json",
+                headers: options.ajaxheaders,
                 success: function (data) {
                   params.success(data);
                   $.notify("Element updated", "success");
@@ -217,6 +219,7 @@
         $.ajax(options.url, {
           type: 'GET',
           dataType: 'json',
+          headers: options.ajaxheaders,
           success: function (data) {
             params.success(data);
             $.notify("Data loaded", "success");
@@ -238,6 +241,7 @@
           $.ajax(u[0] + '/' + datum[idColumn] + "?" + (u[1] || ""), {
           type: 'DELETE',
           dataType: 'json',
+          headers: options.ajaxheaders,
           success: function (data) {
             params.success(data);
             $.notify("Element deleted", "success");
@@ -260,6 +264,7 @@
           type: 'PUT',
           dataType: 'json',
           contentType: "application/json",
+          headers: options.ajaxheaders,
           data: { order: order },
           success: params.success,
           error: params.error

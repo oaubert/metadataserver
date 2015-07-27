@@ -620,11 +620,11 @@ def key_get(k):
             data = json.loads(request.data)
             if data['key'] != el['key']:
                 abort(500)
-            validate_schema(data, 'key')
             data['_id'] = el['_id']
             # Let's handle both restAdmin serialization and raw edition
             if isinstance(data['capabilities'], basestring):
                 data['capabilities'] = data['capabilities'].split(',')
+            validate_schema(data, 'key')
             db['apikeys'].save(data)
             load_keys()
             return make_response(json.dumps(data, cls=MongoEncoder), 201)

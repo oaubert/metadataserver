@@ -522,13 +522,17 @@
           td.append(text);
           row.append(td);
         });
-        var controls = $('<td><a href="#" class="btn btn-mini " data-role="edit"><i class="icon-pencil"></i> Edit</a> | <a href="#" class="btn btn-mini " data-role="delete"><i class="icon delete"></i> Delete</a></td>');
+        var controls = $('<td><a href="#" class="btn btn-mini " data-role="edit"><i class="icon-pencil"></i> Edit</a> | <a href="#" class="btn btn-mini " data-role="rawedit"><i class="icon-pencil"></i> Raw</a> | <a href="#" class="btn btn-mini " data-role="delete"><i class="icon delete"></i> Delete</a></td>');
         row.append(controls);
         row.data('id', datum[idColumn]);
         tbody.append(row);
         row.css('cursor', 'pointer');
         controls.find('[data-role="edit"]').click(function() {
           edit(datum);
+          return false;
+        });
+        controls.find('[data-role="rawedit"]').click(function() {
+          edit(datum, true);
           return false;
         });
         controls.find('[data-role="delete"]').click(function() {
@@ -591,7 +595,7 @@
       container.trigger('jraRefreshedList');
     }
 
-    function edit(datum)
+    function edit(datum, rawedition)
     {
       var isNew = (datum === false);
       var outer = $('<div class="editor"></div>');
@@ -613,25 +617,36 @@
           }
         });
       }
-      eachColumn(function(column) {
-        var fieldset = $('<fieldset data-role="fieldset"><label data-role="label"></label></fieldset>');
-        var arrow = $('<i class="attention-arrow icon-hand-right"></i>');
-        arrow.hide();
-        fieldset.append(arrow);
-        column.arrow = arrow;
-        fieldset.find('[data-role="label"]').text(column.label);
-        var control = options.types[column.type].control(column, traverse(datum, column.name));
-        control.attr('data-column', column.name);
-        if (column.type == ('checkbox' || 'radio')) {
-          fieldset.find('label').prepend(control).addClass(column.type);
-        }
-        else {
-          fieldset.append(control);
-        }
+      if (rawedition) {
         var group = $('<div class="pure-control-group"></div>');
-        group.append(fieldset);
+        var rawedit = $('<fieldset data-role="fieldset"><label data-role="label">Raw edition</label></fieldset>');
+        var raw_textarea = $('<textarea class="raw_edit_data"></textarea>');
+        raw_textarea.css({ width: "80%", height: "200px" });
+        raw_textarea.text(JSON.stringify(datum, null, '  '));
+        rawedit.append(raw_textarea);
+        group.append(rawedit);
         form.append(group);
-      });
+      } else {
+        eachColumn(function(column) {
+          var fieldset = $('<fieldset data-role="fieldset"><label data-role="label"></label></fieldset>');
+          var arrow = $('<i class="attention-arrow icon-hand-right"></i>');
+          arrow.hide();
+          fieldset.append(arrow);
+          column.arrow = arrow;
+          fieldset.find('[data-role="label"]').text(column.label);
+          var control = options.types[column.type].control(column, traverse(datum, column.name));
+          control.attr('data-column', column.name);
+          if (column.type == ('checkbox' || 'radio')) {
+            fieldset.find('label').prepend(control).addClass(column.type);
+          }
+          else {
+            fieldset.append(control);
+          }
+          var group = $('<div class="pure-control-group"></div>');
+          group.append(fieldset);
+          form.append(group);
+        });
+      }
       outer.append(form);
       var controlGroup = $('<div class="form-actions"></div>');
       var saveButton = $('<button class="btn btn-primary" data-role="submit">Save</button> ');
@@ -643,22 +658,32 @@
       }
       saveButton.click(function() {
         var invalid = false;
-        eachColumn(function(column) {
-          // Some types just update the datum directly
-          updateColumn(datum, column);
-          if (column.required && (!traverse(datum, column.name)))
-          {
-            column.arrow.show();
-            // Flag missing items
+        if (rawedition) {
+          // Update from raw field
+          var data = raw_textarea.val();
+          try {
+            datum = JSON.parse(data);
+          } catch (e) {
             invalid = true;
           }
-          if (column.unique && (isDuplicate(datum, column)))
-          {
-            column.arrow.show();
-            // Flag duplicate items
-            invalid = true;
-          }
-        });
+        } else {
+          eachColumn(function(column) {
+            // Some types just update the datum directly
+            updateColumn(datum, column);
+            if (column.required && (!traverse(datum, column.name)))
+            {
+              column.arrow.show();
+              // Flag missing items
+              invalid = true;
+            }
+            if (column.unique && (isDuplicate(datum, column)))
+            {
+              column.arrow.show();
+              // Flag duplicate items
+              invalid = true;
+            }
+          });
+        }
         if (invalid)
         {
           return false;
@@ -684,7 +709,7 @@
         list();
         return false;
       });
-      if (!isNew)
+      if (!isNew && !rawedition)
       {
         removeButton.click(function() {
           var invalid = false;

@@ -579,11 +579,16 @@ def key_list():
         # Create a new key
         data = json.loads(request.data)
         if data.get('key') and data.get('capabilities'):
+            key = data.get('key')
+            el = db['apikeys'].find_one({ 'key': key })
+            if el is not None:
+                # Key already existing. Should use update.
+                abort(409)
             caps = data.get('capabilities')
             # Let's handle both restAdmin serialization and raw edition
             if isinstance(caps, basestring):
                 caps = caps.split(",")
-            data = { 'key': data.get('key'),
+            data = { 'key': key,
                      'capabilities': caps }
             validate_schema(data, 'key')
             db['apikeys'].insert(data)

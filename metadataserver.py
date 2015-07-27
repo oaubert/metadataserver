@@ -399,41 +399,7 @@ def moderate_view():
 @app.route('/login', methods = ['GET', 'POST'])
 @crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ])
 def login():
-    # 'userinfo' is either a (GET) named param, or a (POST) form
-    # field, whose value contains JSON data with information about
-    # the user
-    params = request.values.get('default_user', '{"login": "anonymous"}')
-    if 'userinfo' in session:
-        # session was already initialized. Update its information.
-        d = json.loads(params)
-        d['id'] = session['userinfo']['id']
-        db['userinfo'].update( {"id": session['userinfo']['id']}, d)
-        session['userinfo'].update(d)
-        session.modified = True
-    else:
-        session['userinfo'] = json.loads(params)
-        session['userinfo'].setdefault('id', str(uuid.uuid1()))
-        db['userinfo'].save(dict(session['userinfo']))
-        session.modified = True
-
-    # Current time in ms. It may be different from times sent by
-    # client, because of different timezones or even clock skew. It is
-    # indicative.
-    t = long(time.time() * 1000)
-    db['trace'].save({ '_serverid': session['userinfo'].get('id', ""),
-                       '@type': 'Login',
-                       'begin': t,
-                       'end': t,
-                       'subject': session['userinfo'].get('default_subject', "anonymous")
-                       })
-    if CONFIG.get('enable_debug'):
-        app.logger.debug("Logged in as " + session['userinfo']['id'])
-    return redirect(url_for('index'))
-
-@app.route('/logout')
-def logout():
-    session.pop('userinfo', None)
-    return redirect(url_for('index'))
+    return render_template('login.html')
 
 # Specific fields that can be used to filter elements, in addition to the standard ones (user)
 SPECIFIC_QUERYMAPS = {
@@ -718,7 +684,7 @@ def package_list():
         if not p.get('main_media') or p['main_media'].get('id-ref') == 'package1':
             # Use first media if no valid media was specified
             p['main_media']['id-ref'] = { 'id-ref': data['medias'][0]['id'] }
-            
+
         newmediaref = mapping.get(p['main_media'].get('id-ref'))
         if newmediaref is not None:
             p['main_media']['id-ref'] = newmediaref

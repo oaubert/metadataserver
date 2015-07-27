@@ -9,17 +9,18 @@
         <script type="text/javascript" src="../static/jquery.min.js"></script>
         <script type="text/javascript" src="../static/jquery.restAdmin.js"></script>
         <script type="text/javascript" src="../static/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="../static/metaserver.js"></script>
     </head>
 
     <body>
       <header>
-      <nav>
-        <ul>
-          <li><a href="../?apikey={{key}}">Index</a></li>
-          <li><a href="../package/?apikey={{key}}">Packages</a></li>
-          <li><a href="../admin/?apikey={{key}}">Admin</a></li>
-        </ul>
-      </nav>
+        <nav>
+          <ul>
+            <li><a href="../?apikey={{key}}">Index</a></li>
+            <li><a href="../moderate/?apikey={{key}}">Moderate</a></li>
+          </ul>
+        </nav>
+        <div class="loginmenu"><a id="apikey" href="login">No API key</a></div>
       </header>
 
       <h1>Available packages</h1>

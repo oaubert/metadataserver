@@ -23,6 +23,7 @@
     <li><a class="internal_link" href="#annotation-listing">Annotations</a></li>
   </ul>
 </nav>
+<div class="loginmenu"><a id="apikey" href="login">No API key</a></div>
 </header>
 
 <h1>Package listing</h1>
@@ -38,6 +39,7 @@
 
 <script type="text/javascript" src="../static/underscore.js"></script>
 <script type="text/javascript" src="../static/jquery.min.js"></script>
+<script type="text/javascript" src="../static/metaserver.js"></script>
 <script type="text/javascript" src="../static/notify.min.js"></script>
 <script type="text/javascript" src="../static/jquery.restAdmin.js"></script>
 <script type="text/javascript" src="../static/jquery.dataTables.min.js"></script>
@@ -45,6 +47,7 @@
     $(function() {
         $('#media-listing').restAdmin({
             url: '../api/media?apikey={{key}}',
+            ajaxheaders: get_ajax_headers(),
             schema: [
                 {
                     name: "id",
@@ -107,6 +110,7 @@
         });
         $('#package-listing').restAdmin({
             url: '../api/meta?apikey={{key}}',
+            ajaxheaders: get_ajax_headers(),
             schema: [
                 {
                     name: "id",
@@ -155,6 +159,7 @@
         });
         $('#annotation-listing').restAdmin({
             url: '../api/annotation?apikey={{key}}{% if filter %}&filter={{ filter }}{%endif%}',
+            ajaxheaders: get_ajax_headers(),
             schema: [
                 {
                     name: "id",
@@ -218,6 +223,7 @@
         });
         $('#annotationtype-listing').restAdmin({
             url: '../api/annotationtype?apikey={{key}}',
+            ajaxheaders: get_ajax_headers(),
             schema: [
                 {
                     name: "id",
@@ -261,6 +267,7 @@
         });
         $('#apikey-listing').restAdmin({
             url: '../api/key/?apikey={{key}}',
+            ajaxheaders: get_ajax_headers(),
             id: 'key',
             schema: [
                 {

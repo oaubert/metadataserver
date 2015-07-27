@@ -23,7 +23,7 @@ header a {
 header a:hover {
     background-color: #ccc;
 }
-#loginName {
+.loginmenu {
     position: absolute;
     margin: 0px;
     padding: 0px;

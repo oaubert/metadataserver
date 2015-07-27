@@ -13,9 +13,7 @@
         <li><a href="moderate/?apikey={{key}}">Moderate</a></li>
       </ul>
     </nav>
-  {% if userinfo %}
-  <p id="loginName">{{ userinfo.login }}</p>
-  {% endif %}
+    <div class="loginmenu"><a id="apikey" href="login">No API key</a></div>
 </header>
 <h1>Server index</h1>
 <ul>
@@ -23,5 +21,8 @@
   <li><a href="admin/?apikey={{key}}">Admin interface</a></li>
   <li><a href="moderate/?apikey={{key}}">Moderate</a></li>
 </ul>
+<script type="text/javascript" src="../static/jquery.min.js"></script>
+<script type="text/javascript" src="../static/metaserver.js"></script>
+</script>
 </body>
 

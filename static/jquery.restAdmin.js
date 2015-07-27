@@ -173,8 +173,14 @@
           dataType: 'json',
           processData: false,
           contentType: "application/json",
-          success: params.success,
-          error: params.error
+            success: function (data) {
+              params.success(data);
+              $.notify("Element created", "success");
+            },
+            error: function (m) {
+              $.notify("Cannot create element: " + m.statusText, "error");
+              params.error && params.error();
+            }
         });
       };
     }
@@ -191,8 +197,14 @@
                 dataType: 'json',
                 processData: false,
                 contentType: "application/json",
-                success: params.success,
-                error: params.error
+                success: function (data) {
+                  params.success(data);
+                  $.notify("Element updated", "success");
+                },
+                error: function (m) {
+                  $.notify("Cannot update element: " + m.statusText, "error");
+                  params.error && params.error();
+                }
             });
         };
     }
@@ -205,8 +217,14 @@
         $.ajax(options.url, {
           type: 'GET',
           dataType: 'json',
-          success: params.success,
-          error: params.error
+          success: function (data) {
+            params.success(data);
+            $.notify("Data loaded", "success");
+          },
+          error: function (m) {
+            $.notify("Cannot load data: " + m.statusText, "error");
+              params.error && params.error();
+          }
         });
       };
     }
@@ -220,8 +238,14 @@
           $.ajax(u[0] + '/' + datum[idColumn] + "?" + (u[1] || ""), {
           type: 'DELETE',
           dataType: 'json',
-          success: params.success,
-          error: params.error
+          success: function (data) {
+            params.success(data);
+            $.notify("Element deleted", "success");
+          },
+          error: function (m) {
+            $.notify("Cannot delete element: " + m.statusText, "error");
+            params.error && params.error();
+          }
         });
       };
     }
@@ -665,6 +689,7 @@
             datum = JSON.parse(data);
           } catch (e) {
             invalid = true;
+            $.notify("Cannot parse JSON data " + e, "error");
           }
         } else {
           eachColumn(function(column) {

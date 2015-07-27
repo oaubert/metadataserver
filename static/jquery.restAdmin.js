@@ -492,13 +492,13 @@
       var table = $('<table class="table table-striped"></table>');
       var headerRow = $('<tr></tr>');
 
+      headerRow.append($('<th>Actions</th>'));
       eachColumn(function(column) {
         var th = $('<th></th>');
         th.text(column.label);
         th.addClass(column.name);
         headerRow.append(th);
       });
-      headerRow.append($('<th>Actions</th>'));
       var header = $('<thead></thead>');
       header.append(headerRow);
       table.append(header);
@@ -506,6 +506,8 @@
       _.each(options.data, function(datum) {
         var row = $('<tr data-role="row"></tr>');
         var first = true;
+        var controls = $('<td><a href="#" class="btn btn-mini " title="Edit" data-role="edit"><i class="icon-pencil"></i> E</a> | <a href="#" class="btn btn-mini " title="Raw edit" data-role="rawedit"><i class="icon-pencil"></i> R</a> | <a href="#" class="btn btn-mini " title="Delte" data-role="delete"><i class="icon delete"></i> D</a></td>');
+        row.append(controls);
         eachColumn(function(column) {
           var val = options.types[column.type].listText(column, traverse(datum, column.name));
           var td = $('<td></td>');
@@ -522,8 +524,6 @@
           td.append(text);
           row.append(td);
         });
-        var controls = $('<td><a href="#" class="btn btn-mini " data-role="edit"><i class="icon-pencil"></i> Edit</a> | <a href="#" class="btn btn-mini " data-role="rawedit"><i class="icon-pencil"></i> Raw</a> | <a href="#" class="btn btn-mini " data-role="delete"><i class="icon delete"></i> Delete</a></td>');
-        row.append(controls);
         row.data('id', datum[idColumn]);
         tbody.append(row);
         row.css('cursor', 'pointer');

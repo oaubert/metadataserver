@@ -1,6 +1,6 @@
 body {
     margin: 0px;
-    padding: 0px;    
+    padding: 0px;
     font-family: Calibri, sans-serif;
     background-color: #fff;
 }
@@ -36,6 +36,10 @@ nav ul {
 }
 nav ul li {
     display: inline;
+}
+nav .internal_link {
+    font-style: oblique;
+    color: #555;
 }
 h1:first-child {
     margin-top: 2em;

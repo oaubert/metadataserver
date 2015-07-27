@@ -546,7 +546,7 @@ def element_get(eid, collection):
                 # Fix missing/wrong fields
                 normalize_annotation(data)
             db[collection].save(clean_json(data))
-            return make_response("Resource updated.", 201)
+            return make_response(json.dumps(data, cls=MongoEncoder), 201)
         abort(500)
     return current_app.response_class(json.dumps(el, indent=None if request.is_xhr else 2, cls=MongoEncoder),
                                       mimetype='application/json')
@@ -627,7 +627,7 @@ def key_get(k):
                 data['capabilities'] = data['capabilities'].split(',')
             db['apikeys'].save(data)
             load_keys()
-            return make_response("Resource updated.", 201)
+            return make_response(json.dumps(data, cls=MongoEncoder), 201)
         abort(500)
     # GET
     return current_app.response_class(json.dumps(el, indent=None if request.is_xhr else 2, cls=MongoEncoder),

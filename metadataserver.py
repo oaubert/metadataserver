@@ -100,7 +100,12 @@ class InvalidAccess(Exception):
 def get_api_key():
     """Return the request API key
     """
-    return request.values.get('apikey') or request.headers.get('x-apikey') or DEFAULT_KEY
+    key = request.headers.get('x-apikey') or DEFAULT_KEY
+    # Allow to override with parameter
+    param =  request.values.get('apikey')
+    if param and param != DEFAULT_KEY:
+        key = param
+    return key
 
 @app.errorhandler(InvalidAccess)
 def handle_invalid_access(error):

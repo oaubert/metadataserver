@@ -540,14 +540,14 @@ def element_get(eid, collection):
         if request.headers.get('content-type') == 'application/json':
             data = json.loads(request.data)
             if data['id'] != el['id']:
-                abort(500)
+                abort(409, "Mismatching element")
             data['_id'] = el['_id']
             if collection == 'annotations':
                 # Fix missing/wrong fields
                 normalize_annotation(data)
             db[collection].save(clean_json(data))
             return make_response(json.dumps(data, cls=MongoEncoder), 201)
-        abort(500)
+        abort(415)
     return current_app.response_class(json.dumps(el, indent=None if request.is_xhr else 2, cls=MongoEncoder),
                                       mimetype='application/json')
 
@@ -624,7 +624,7 @@ def key_get(k):
         if request.headers.get('content-type') == 'application/json':
             data = json.loads(request.data)
             if data['key'] != el['key']:
-                abort(500)
+                abort(409)
             data['_id'] = el['_id']
             # Let's handle both restAdmin serialization and raw edition
             if isinstance(data['capabilities'], basestring):
@@ -633,7 +633,7 @@ def key_get(k):
             db['apikeys'].save(data)
             load_keys()
             return make_response(json.dumps(data, cls=MongoEncoder), 201)
-        abort(500)
+        abort(415)
     # GET
     return current_app.response_class(json.dumps(el, indent=None if request.is_xhr else 2, cls=MongoEncoder),
                                       mimetype='application/json')

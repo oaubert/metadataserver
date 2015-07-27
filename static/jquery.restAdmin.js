@@ -535,7 +535,7 @@
       _.each(options.data, function(datum) {
         var row = $('<tr data-role="row"></tr>');
         var first = true;
-        var controls = $('<td><a href="#" class="btn btn-mini " title="Edit" data-role="edit"><i class="icon-pencil"></i> E</a> | <a href="#" class="btn btn-mini " title="Raw edit" data-role="rawedit"><i class="icon-pencil"></i> R</a> | <a href="#" class="btn btn-mini " title="Delte" data-role="delete"><i class="icon delete"></i> D</a></td>');
+        var controls = $('<td><a href="#" class="btn btn-mini " title="Edit" data-role="edit"><i class="icon-pencil"></i> E</a> <a href="#" class="btn btn-mini " title="Raw edit" data-role="rawedit"><i class="icon-pencil"></i> R</a> <a href="#" class="btn btn-mini " title="Delete" data-role="delete"><i class="icon delete"></i> D</a></td>');
         row.append(controls);
         eachColumn(function(column) {
           var val = options.types[column.type].listText(column, traverse(datum, column.name));

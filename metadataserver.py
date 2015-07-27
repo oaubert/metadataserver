@@ -156,6 +156,14 @@ def crossdomain(origin=None, methods=None, headers=None,
         return update_wrapper(wrapped_function, f)
     return decorator
 
+def validate_schema(data, schemaid):
+    # Check data structure, using jsonschema
+    try:
+        jsonschema.validate(data, SCHEMAS[schemaid])
+    except (jsonschema.ValidationError, jsonschema.SchemaError), e:
+        # Unprocessable entity
+        abort(422, e.message)
+
 def load_keys():
     """Load API key data.
     """
@@ -615,12 +623,7 @@ def analytics_list():
         # Create a new key
         data = json.loads(request.data)
         data['date'] = datetime.datetime.now().isoformat()
-        # Check data structure, using jsonschema
-        try:
-            jsonschema.validate(data, SCHEMAS['analytics'])
-        except (jsonschema.ValidationError, jsonschema.SchemaError), e:
-            # Unprocessable entity
-            abort(422, e.message)
+        validate_schema(data, 'analytics')
         # date, username, useruuid, subject, property, value
         db['analytics'].insert(data)
         return current_app.response_class( json.dumps(data,

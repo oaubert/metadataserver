@@ -107,6 +107,10 @@ def get_api_key():
         key = param
     return key
 
+def connect_db():
+    global db
+    db = connection[CONFIG['database']]
+
 @app.errorhandler(InvalidAccess)
 def handle_invalid_access(error):
     return make_response("Invalid API key", 403)
@@ -755,7 +759,6 @@ app.secret_key = os.urandom(24)
 
 if __name__ == "__main__":
     global db
-
     parser = OptionParser(usage="""Trace server.\n%prog [options]""")
 
     parser.add_option("-D", "--database", dest="database", action="store", default="mds")
@@ -770,7 +773,7 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
     CONFIG.update(vars(options))
 
-    db = connection[CONFIG['database']]
+    connect_db()
 
     if options.admin_key:
         db['apikeys'].insert({ 'key': options.admin_key,

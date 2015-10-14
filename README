@@ -1,0 +1,7 @@
+MetaDataServer
+==============
+
+MetaDataServer is a basic server for video annotations. It stores and
+serves video annotations in the Cinelab format.
+
+License: LGPL3+

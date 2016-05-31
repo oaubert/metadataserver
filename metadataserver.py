@@ -34,6 +34,8 @@ import time
 import datetime
 from functools import wraps, update_wrapper
 from optparse import OptionParser
+import smtplib
+from email.mime.text import MIMEText
 
 import jsonschema
 import pymongo
@@ -154,6 +156,7 @@ def crossdomain(origin=None, methods=None, headers=None,
 
     def decorator(f):
         def wrapped_function(*args, **kwargs):
+            print "Checking wrapper CORS"
             if automatic_options and request.method == 'OPTIONS':
                 resp = current_app.make_default_options_response()
             else:
@@ -170,9 +173,11 @@ def crossdomain(origin=None, methods=None, headers=None,
             h['Access-Control-Max-Age'] = str(max_age)
             if headers is not None:
                 h['Access-Control-Allow-Headers'] = headers
+            print "CORS wrapped"
             return resp
 
         f.provide_automatic_options = False
+        print "Wrapping"
         return update_wrapper(wrapped_function, f)
     return decorator
 
@@ -722,6 +727,7 @@ def package_list():
 
 @app.route(API_PREFIX + 'package/<string:pid>', methods= [ 'GET' ])
 @check_access(('element', 'package'))
+@crossdomain(origin='*', methods= [ 'GET', 'POST', 'HEAD', 'OPTIONS' ], headers=CORS_HEADERS)
 def package_get(pid):
     meta = db['packages'].find_one({ 'id': pid })
     if meta is None:
@@ -754,6 +760,24 @@ def package_get(pid):
         mimetype = 'application/javascript'
     return current_app.response_class(data, mimetype=mimetype)
 
+def send_email():
+    fp = open(textfile, 'rb')
+    # Create a text/plain message
+    msg = MIMEText(fp.read())
+    fp.close()
+
+    # me == the sender's email address
+    # you == the recipient's email address
+    msg['Subject'] = 'The contents of %s' % textfile
+    msg['From'] = me
+    msg['To'] = you
+
+    # Send the message via our own SMTP server, but don't include the
+    # envelope header.
+    s = smtplib.SMTP('localhost')
+    s.sendmail(me, [you], msg.as_string())
+    s.quit()
+
 # set the secret key.  keep this really secret:
 app.secret_key = os.urandom(24)
 
@@ -766,12 +790,16 @@ if __name__ == "__main__":
                       help="Enable debug mode.", default=False)
     parser.add_option("-x", "--cross-site-requests", dest="enable_cross_site_requests", action="store_true",
                       help="Enable cross site requests.", default=False)
+    parser.add_option("-e", "--external", dest="allow_external_access", action="store_true",
+                      help="Allow external access (from any host)", default=False)
     parser.add_option("-p", "--port", dest="port", type="int", action="store",
                       help="Port number", default=5001)
     parser.add_option("-K", "--admin-api-key", dest="admin_key", action="store", help="Store an admin API key", default=None)
 
     (options, args) = parser.parse_args()
     CONFIG.update(vars(options))
+    if options.enable_debug:
+        options.allow_external_access = False
 
     connect_db()
 
@@ -788,5 +816,7 @@ if __name__ == "__main__":
 
     if CONFIG['enable_debug']:
         app.run(debug=True, port=CONFIG['port'])
-    else:
+    elif CONFIG['allow_external_access']:
         app.run(debug=False, host='0.0.0.0', port=CONFIG['port'])
+    else:
+        app.run(debug=False, port=CONFIG['port'])
